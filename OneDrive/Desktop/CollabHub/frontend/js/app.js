@@ -16,32 +16,60 @@ function initializeApp() {
 
     // Add smooth scrolling for anchor links
     initSmoothScroll();
+
+    // Initialize logout functionality
+    initLogout();
 }
 
 /**
  * Update navigation based on auth status
  */
 function updateNavigation() {
-    const authNav = document.getElementById('auth-nav');
-    const userNav = document.getElementById('user-nav');
-
-    if (!authNav && !userNav) return;
-
     const { isAuthenticated, getUserData } = window.CollabHubAPI || {};
+    
+    // Get navigation elements
+    const unauthenticatedNav = document.getElementById('unauthenticated-nav');
+    const authenticatedNav = document.getElementById('authenticated-nav');
+    const unauthenticatedActions = document.getElementById('unauthenticated-actions');
+    const authenticatedActions = document.getElementById('authenticated-actions');
+    const dashboardLink = document.getElementById('dashboard-link');
 
     if (isAuthenticated && isAuthenticated()) {
-        const user = getUserData ? getUserData() : null;
-        if (authNav) authNav.classList.add('hidden');
-        if (userNav) {
-            userNav.classList.remove('hidden');
-            const userName = userNav.querySelector('#user-name');
-            if (userName && user) {
-                userName.textContent = user.first_name || user.username || 'User';
+        // User is logged in - show authenticated navigation
+        if (unauthenticatedNav) unauthenticatedNav.classList.add('hidden');
+        if (authenticatedNav) authenticatedNav.classList.remove('hidden');
+        if (unauthenticatedActions) unauthenticatedActions.classList.add('hidden');
+        if (authenticatedActions) authenticatedActions.classList.remove('hidden');
+        
+        // Set dashboard link based on user role
+        if (dashboardLink && getUserData) {
+            const user = getUserData();
+            if (user && user.role) {
+                const dashboards = {
+                    founder: 'pages/dashboard-founder.html',
+                    talent: 'pages/dashboard-talent.html',
+                    investor: 'pages/dashboard-investor.html',
+                    student: 'pages/dashboard-talent.html'
+                };
+                dashboardLink.href = dashboards[user.role] || dashboards.talent;
             }
         }
     } else {
-        if (authNav) authNav.classList.remove('hidden');
-        if (userNav) userNav.classList.add('hidden');
+        // User is logged out - show unauthenticated navigation
+        if (unauthenticatedNav) unauthenticatedNav.classList.remove('hidden');
+        if (authenticatedNav) authenticatedNav.classList.add('hidden');
+        if (unauthenticatedActions) unauthenticatedActions.classList.remove('hidden');
+        if (authenticatedActions) authenticatedActions.classList.add('hidden');
+    }
+}
+
+/**
+ * Initialize logout functionality
+ */
+function initLogout() {
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
     }
 }
 
@@ -159,15 +187,15 @@ function redirectToDashboard() {
     const user = getUserData ? getUserData() : null;
 
     if (!user) {
-        window.location.href = '/frontend/pages/login.html';
+        window.location.href = 'pages/login.html';
         return;
     }
 
     const dashboards = {
-        founder: '/frontend/pages/dashboard-founder.html',
-        talent: '/frontend/pages/dashboard-talent.html',
-        investor: '/frontend/pages/dashboard-investor.html',
-        student: '/frontend/pages/dashboard-talent.html'
+        founder: 'pages/dashboard-founder.html',
+        talent: 'pages/dashboard-talent.html',
+        investor: 'pages/dashboard-investor.html',
+        student: 'pages/dashboard-talent.html'
     };
 
     window.location.href = dashboards[user.role] || dashboards.talent;
@@ -180,7 +208,7 @@ function requireAuth() {
     const { isAuthenticated } = window.CollabHubAPI || {};
 
     if (!isAuthenticated || !isAuthenticated()) {
-        window.location.href = '/frontend/pages/login.html?redirect=' + encodeURIComponent(window.location.href);
+        window.location.href = 'pages/login.html?redirect=' + encodeURIComponent(window.location.href);
         return false;
     }
     return true;
@@ -193,12 +221,19 @@ async function handleLogout() {
     const { api } = window.CollabHubAPI || {};
 
     try {
-        if (api) await api.logout();
+        if (api) {
+            await api.logout();
+        }
+        showToast('Logged out successfully', 'success');
     } catch (e) {
         console.error('Logout error:', e);
+        showToast('Logout failed', 'error');
     }
 
-    window.location.href = '/frontend/index.html';
+    // Always redirect to home page after logout attempt
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 1000);
 }
 
 // Export utilities
@@ -210,5 +245,6 @@ window.AppUtils = {
     debounce,
     redirectToDashboard,
     requireAuth,
-    handleLogout
+    handleLogout,
+    updateNavigation
 };
