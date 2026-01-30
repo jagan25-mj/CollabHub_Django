@@ -19,8 +19,8 @@ class UserAuthenticationTests(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
-        self.register_url = '/api/auth/register/'
-        self.login_url = '/api/auth/login/'
+        self.register_url = '/api/v1/auth/register/'
+        self.login_url = '/api/v1/auth/login/'
         
         self.user_data = {
             'username': 'testuser',
@@ -97,7 +97,7 @@ class StartupAPITests(APITestCase):
     def test_create_startup_as_founder(self):
         """Test founder can create startup."""
         self.client.force_authenticate(user=self.founder)
-        response = self.client.post('/api/startups/', self.startup_data, format='json')
+        response = self.client.post('/api/v1/startups/', self.startup_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     
     def test_list_startups(self):
@@ -113,7 +113,7 @@ class StartupAPITests(APITestCase):
             stage='idea'
         )
         
-        response = self.client.get('/api/startups/')
+        response = self.client.get('/api/v1/startups/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_update_startup_by_non_founder_fails(self):
@@ -127,7 +127,7 @@ class StartupAPITests(APITestCase):
         )
         
         self.client.force_authenticate(user=self.talent)
-        response = self.client.patch(f'/api/startups/{startup.id}/', {'name': 'Hacked'}, format='json')
+        response = self.client.patch(f'/api/v1/startups/{startup.id}/', {'name': 'Hacked'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -155,19 +155,19 @@ class OpportunityAPITests(APITestCase):
     def test_list_opportunities(self):
         """Test listing opportunities."""
         self.client.force_authenticate(user=self.user)
-        response = self.client.get('/api/opportunities/')
+        response = self.client.get('/api/v1/opportunities/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_filter_opportunities_by_type(self):
         """Test filtering opportunities by type."""
         self.client.force_authenticate(user=self.user)
-        response = self.client.get('/api/opportunities/?type=hackathon')
+        response = self.client.get('/api/v1/opportunities/?type=hackathon')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_search_opportunities(self):
         """Test searching opportunities."""
         self.client.force_authenticate(user=self.user)
-        response = self.client.get('/api/opportunities/?search=hackathon')
+        response = self.client.get('/api/v1/opportunities/?search=hackathon')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -201,7 +201,7 @@ class ApplicationAPITests(APITestCase):
     def test_apply_to_opportunity(self):
         """Test applying to an opportunity."""
         self.client.force_authenticate(user=self.applicant)
-        response = self.client.post('/api/collaborations/applications/', {
+        response = self.client.post('/api/v1/collaborations/applications/', {
             'opportunity': self.opportunity.id,
             'cover_letter': 'I would love to join!'
         }, format='json')
@@ -212,13 +212,13 @@ class ApplicationAPITests(APITestCase):
         self.client.force_authenticate(user=self.applicant)
         
         # First application
-        self.client.post('/api/collaborations/applications/', {
+        self.client.post('/api/v1/collaborations/applications/', {
             'opportunity': self.opportunity.id,
             'cover_letter': 'First application'
         }, format='json')
         
         # Duplicate
-        response = self.client.post('/api/collaborations/applications/', {
+        response = self.client.post('/api/v1/collaborations/applications/', {
             'opportunity': self.opportunity.id,
             'cover_letter': 'Duplicate'
         }, format='json')
@@ -234,7 +234,7 @@ class InputValidationTests(APITestCase):
     
     def test_registration_password_too_short(self):
         """Test password validation."""
-        response = self.client.post('/api/auth/register/', {
+        response = self.client.post('/api/v1/auth/register/', {
             'username': 'testuser',
             'email': 'test@example.com',
             'password': '123',
@@ -245,7 +245,7 @@ class InputValidationTests(APITestCase):
     
     def test_registration_invalid_email(self):
         """Test email validation."""
-        response = self.client.post('/api/auth/register/', {
+        response = self.client.post('/api/v1/auth/register/', {
             'username': 'testuser',
             'email': 'invalid-email',
             'password': 'TestPass123!',

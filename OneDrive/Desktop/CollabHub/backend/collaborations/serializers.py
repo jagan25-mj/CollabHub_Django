@@ -32,6 +32,18 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = ['opportunity', 'cover_letter', 'resume_url', 'portfolio_url']
+    
+    def validate(self, data):
+        """Check for duplicate applications."""
+        # Get the applicant from context (set by the view)
+        applicant = self.context['request'].user
+        opportunity = data['opportunity']
+        
+        # Check if user already applied to this opportunity
+        if Application.objects.filter(applicant=applicant, opportunity=opportunity).exists():
+            raise serializers.ValidationError("You have already applied to this opportunity.")
+        
+        return data
 
 
 class ApplicationUpdateSerializer(serializers.ModelSerializer):

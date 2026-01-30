@@ -13,6 +13,7 @@ from django.http import FileResponse, HttpResponseNotFound
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from collabhub.health import health_check, metrics, liveness, readiness
 import os
 
 
@@ -39,8 +40,9 @@ def serve_frontend(request, page='index.html'):
 def api_root(request):
     """Root API endpoint with documentation."""
     return Response({
-        'message': 'Welcome to CollabHub API',
+        'message': 'Welcome to CollabHub API v1',
         'version': '1.0.0',
+        'status': 'operational',
         'endpoints': {
             'auth': {
                 'register': '/api/v1/auth/register/',
@@ -53,6 +55,14 @@ def api_root(request):
             'opportunities': '/api/v1/opportunities/',
             'applications': '/api/v1/collaborations/applications/',
             'messages': '/api/v1/messages/',
+            'recommendations': '/api/v1/recommendations/',
+            'feed': '/api/v1/feed/',
+        },
+        'health': {
+            'status': '/health/',
+            'metrics': '/metrics/',
+            'liveness': '/live/',
+            'readiness': '/ready/',
         },
         'frontend': '/app/',
         'admin': '/admin/',
@@ -61,6 +71,12 @@ def api_root(request):
 
 
 urlpatterns = [
+    # Health checks & monitoring
+    path('health/', health_check, name='health'),
+    path('metrics/', metrics, name='metrics'),
+    path('live/', liveness, name='liveness'),
+    path('ready/', readiness, name='readiness'),
+    
     # Frontend routes
     path('', lambda r: serve_frontend(r, 'index.html'), name='home'),
     path('app/', lambda r: serve_frontend(r, 'index.html'), name='frontend_home'),
@@ -79,6 +95,7 @@ urlpatterns = [
     path('api/v1/opportunities/', include('opportunities.urls')),    # Opportunities
     path('api/v1/collaborations/', include('collaborations.urls')),  # Collaborations
     path('api/v1/messages/', include('messaging.urls')),             # Messaging
+    path('api/v1/', include('recommendations.urls')),                # Recommendations & Feed
 ]
 
 # Serve media and static files in development

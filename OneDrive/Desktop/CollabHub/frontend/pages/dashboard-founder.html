@@ -1,139 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Founder Dashboard - CollabHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+    </style>
 </head>
-
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans">
-    <nav class="fixed w-full z-50 bg-slate-900/95 backdrop-blur-xl border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
-            <a href="/" class="flex items-center space-x-2">
-                <div
-                    class="w-10 h-10 bg-gradient-to-r from-sky-500 to-fuchsia-500 rounded-xl flex items-center justify-center">
-                    <span class="text-white font-bold">C</span>
-                </div>
-                <span class="text-white font-bold text-xl">CollabHub</span>
-            </a>
-            <div class="flex items-center space-x-4">
-                <a href="/app/profile" class="text-gray-400 hover:text-white">Profile</a>
-                <button onclick="handleLogout()" class="text-red-400 hover:text-red-300">Logout</button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="pt-24 pb-12 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex justify-between items-start mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold text-white mb-2">Founder Dashboard 🚀</h1>
-                    <p class="text-gray-400">Manage startups and find team members.</p>
-                </div>
-                <button onclick="showModal()"
-                    class="px-5 py-3 bg-gradient-to-r from-sky-500 to-fuchsia-500 text-white rounded-xl font-medium">+
-                    Create Startup</button>
-            </div>
-
-            <!-- Stats -->
-            <div class="grid md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
-                    <div class="text-3xl font-bold text-white mb-1">1</div>
-                    <div class="text-gray-400 text-sm">My Startups</div>
-                </div>
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
-                    <div class="text-3xl font-bold text-white mb-1">3</div>
-                    <div class="text-gray-400 text-sm">Posted Opportunities</div>
-                </div>
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
-                    <div class="text-3xl font-bold text-white mb-1">12</div>
-                    <div class="text-gray-400 text-sm">Applications Received</div>
-                </div>
-                <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
-                    <div class="text-3xl font-bold text-white mb-1">5</div>
-                    <div class="text-gray-400 text-sm">Team Members</div>
-                </div>
-            </div>
-
-            <!-- Startups & Applications -->
-            <div class="grid lg:grid-cols-2 gap-8">
-                <div class="bg-white/5 rounded-2xl border border-white/10 p-6">
-                    <h2 class="text-xl font-semibold text-white mb-4">My Startups</h2>
-                    <div id="startups-list" class="space-y-3">
-                        <div class="animate-pulse bg-white/5 rounded-xl p-5 border border-white/10">
-                            <div class="h-6 bg-white/10 rounded w-1/3 mb-2"></div>
-                            <div class="h-4 bg-white/10 rounded w-1/2"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white/5 rounded-2xl border border-white/10 p-6">
-                    <h2 class="text-xl font-semibold text-white mb-4">Applications to Review</h2>
-                    <div id="applications-list" class="space-y-3">
-                        <div class="animate-pulse">
-                            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                                <div class="flex items-center flex-1">
-                                    <div class="w-10 h-10 bg-white/10 rounded-full mr-3"></div>
-                                    <div class="flex-1">
-                                        <div class="h-4 bg-white/10 rounded w-1/3 mb-2"></div>
-                                        <div class="h-3 bg-white/10 rounded w-1/4"></div>
-                                    </div>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <div class="w-20 h-8 bg-white/10 rounded"></div>
-                                    <div class="w-20 h-8 bg-white/10 rounded"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Create Startup Modal -->
-    <div id="createStartupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md">
-            <div class="p-6 border-b border-white/10 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white">Create Startup</h2>
-                <button onclick="closeStartupModal()" class="text-gray-400 hover:text-white">✕</button>
-            </div>
-            <form id="createStartupForm" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm text-gray-400 mb-2">Startup Name</label>
-                    <input id="startupName" type="text" placeholder="e.g., TechFlow" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-sky-500 focus:outline-none" required>
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-2">Description</label>
-                    <textarea id="startupDesc" placeholder="What does your startup do?" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-sky-500 focus:outline-none" rows="3" required></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-2">Industry</label>
-                    <select id="startupIndustry" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-sky-500 focus:outline-none" required>
-                        <option value="" disabled selected>Select Industry</option>
-                        <option value="AI/ML">AI/ML</option>
-                        <option value="FinTech">FinTech</option>
-                        <option value="SaaS">SaaS</option>
-                        <option value="Web3">Web3</option>
-                        <option value="HealthTech">HealthTech</option>
-                        <option value="EdTech">EdTech</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-sky-500 to-fuchsia-500 text-white rounded-lg font-medium hover:opacity-90">Create Startup</button>
-                    <button type="button" onclick="closeStartupModal()" class="flex-1 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+<body class="bg-white">
     <script src="../js/api.js"></script>
+    <script src="../js/state.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    
     <script>
+        // This page is now loaded dynamically via router
+        // No content here - router will inject content
+        // Kept for backward compatibility with direct access
+        window.location.href = '/dashboard/founder';
+    </script>
+</body>
+</html>
         if (!window.CollabHubAPI.isAuthenticated()) window.location.href = '/app/login';
         const user = window.CollabHubAPI.getUserData();
         if (user?.role !== 'founder') window.location.href = `/app/dashboard-${user?.role || 'talent'}`;

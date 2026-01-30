@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import F, Q
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 
 from .models import Startup, StartupMember, StartupUpdate, SavedStartup, FollowedStartup
 from .serializers import (
@@ -21,6 +20,7 @@ from .serializers import (
     FollowedStartupSerializer
 )
 from .permissions import IsFounderOrReadOnly
+from .search import search_startups
 from collaborations.models import Notification
 
 
@@ -45,8 +45,9 @@ class StartupListCreateView(generics.ListCreateAPIView):
     
     def get_queryset(self):
         """
-        Override queryset to support FTS when search parameter is provided.
-        Combines PostgreSQL full-text search with trigram similarity for flexible matching.
+        Override queryset to support search across PostgreSQL and SQLite.
+        Uses full-text search on PostgreSQL, fuzzy matching on SQLite.
+        Automatically detects backend and uses appropriate algorithm.
         """
         queryset = super().get_queryset()
         
@@ -54,22 +55,8 @@ class StartupListCreateView(generics.ListCreateAPIView):
         search_query = self.request.query_params.get('search', '').strip()
         
         if search_query:
-            # Use PostgreSQL full-text search combined with trigram similarity
-            search_vector = SearchVector('name', weight='A') + \
-                           SearchVector('tagline', weight='B') + \
-                           SearchVector('description', weight='C') + \
-                           SearchVector('industry', weight='B')
-            
-            search_obj = SearchQuery(search_query, search_type='websearch')
-            
-            # Apply FTS and rank results
-            queryset = queryset.annotate(
-                search=search_vector,
-                rank=SearchRank(search_vector, search_obj),
-                similarity=TrigramSimilarity('name', search_query)
-            ).filter(
-                Q(search=search_obj) | Q(similarity__gt=0.1)
-            ).order_by('-rank', '-similarity', '-created_at')
+            # Use compatibility search layer
+            queryset = search_startups(queryset, search_query)
         
         return queryset
     

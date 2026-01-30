@@ -25,12 +25,48 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =============================================================================
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-collabhub-dev-key-change-in-production-abc123xyz'
+# In production, set via environment variable
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-collabhub-dev-key-change-in-production-abc123xyz'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Only DEBUG=True in development - NEVER in production
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+# In production, set specific allowed hosts - NEVER use wildcard
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# =============================================================================
+# HTTPS/SECURITY SETTINGS (Production-Grade)
+# =============================================================================
+
+# Only enforce HTTPS in production (when DEBUG=False)
+if not DEBUG:
+    # Force HTTPS redirection
+    SECURE_SSL_REDIRECT = True
+    
+    # Cookie security
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_HTTPONLY = True
+    
+    # Security headers
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking
+    SECURE_CONTENT_SECURITY_POLICY = {
+        'default-src': ("'self'",),
+        'style-src': ("'self'", "'unsafe-inline'"),  # Allow inline for framework
+        'script-src': ("'self'", "'unsafe-inline'"),  # Allow inline for framework
+        'img-src': ("'self'", 'data:', 'https:'),
+    }
+    
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 
 # =============================================================================
@@ -63,10 +99,13 @@ INSTALLED_APPS = [
     'opportunities.apps.OpportunitiesConfig',  # Hackathons, internships, projects
     'collaborations.apps.CollaborationsConfig',  # Applications & team matching
     'messaging.apps.MessagingConfig',    # Direct messaging system
+    'recommendations.apps.RecommendationsConfig',  # Phase 5: Recommendations & Activity Feed
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # CORS - must be first
+    'collabhub.middleware.RequestIdMiddleware',  # Add request ID for tracing
+    'collabhub.middleware.StructuredLoggingMiddleware',  # Structured logging
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -74,6 +113,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'collabhub.middleware.ErrorContextMiddleware',  # Error context for debugging
 ]
 
 ROOT_URLCONF = 'collabhub.urls'
@@ -234,14 +274,16 @@ SIMPLE_JWT = {
 # CORS CONFIGURATION (Cross-Origin Resource Sharing)
 # =============================================================================
 
-# Allow all origins in development (restrict in production)
-CORS_ALLOW_ALL_ORIGINS = True
+# Production: Use restricted origins - NEVER allow all
+# Development: Allow localhost and 127.0.0.1 for testing
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:8000,http://127.0.0.1:3000,http://127.0.0.1:8000'
+).split(',')
 
-# Or specify allowed origins:
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-# ]
+# Legacy setting - OVERRIDE if CORS_ALLOWED_ORIGINS is set
+# In production, this should NEVER be True
+CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -257,6 +299,8 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+
 
 # =============================================================================
 # CHANNELS CONFIGURATION (WebSockets for Real-Time Features)
@@ -264,16 +308,130 @@ CORS_ALLOW_HEADERS = [
 
 ASGI_APPLICATION = 'collabhub.asgi.application'
 
-# Channel layer configuration
+# Detect if Redis is available
+REDIS_AVAILABLE = True
+try:
+    import redis
+    redis.Redis(host=os.getenv('REDIS_HOST', 'localhost'), 
+                port=int(os.getenv('REDIS_PORT', 6379)), 
+                socket_connect_timeout=1).ping()
+except Exception:
+    REDIS_AVAILABLE = False
+
+# Channel layer configuration - use Redis if available, fallback to in-memory
 CHANNEL_LAYERS = {
     'default': {
-        # For development: Use in-memory channel layer (single process)
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
-        
-        # For production: Use Redis channel layer
-        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # 'CONFIG': {
-        #     'hosts': [('redis', 6379)],
-        # },
+        'BACKEND': 'channels_redis.core.RedisChannelLayer' if REDIS_AVAILABLE else 'channels.layers.InMemoryChannelLayer',
+        'CONFIG': {
+            'hosts': [(os.getenv('REDIS_HOST', 'localhost'), int(os.getenv('REDIS_PORT', 6379)))],
+        } if REDIS_AVAILABLE else {}
     }
 }
+
+# =============================================================================
+# CACHING CONFIGURATION (Redis-backed cache with fallback)
+# =============================================================================
+
+if REDIS_AVAILABLE:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': f"redis://{os.getenv('REDIS_HOST', 'localhost')}:{os.getenv('REDIS_PORT', 6379)}/1",
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
+            'KEY_PREFIX': 'collabhub',
+            'TIMEOUT': 300,  # 5 minutes default
+        }
+    }
+else:
+    # Fallback to local memory cache
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'collabhub-cache',
+        }
+    }
+
+# Cache TTLs for different data types
+CACHE_TTL = {
+    'STARTUP_LIST': 300,  # 5 minutes
+    'SEARCH_RESULTS': 600,  # 10 minutes
+    'RECOMMENDATIONS': 1800,  # 30 minutes
+    'FEED': 300,  # 5 minutes
+    'USER_PROFILE': 600,  # 10 minutes
+}
+
+# =============================================================================
+# LOGGING CONFIGURATION (Structured logging)
+# =============================================================================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+        },
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple' if DEBUG else 'json',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'collabhub.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'json' if not DEBUG else 'verbose',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'collabhub_errors.log',
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 10,
+            'formatter': 'json' if not DEBUG else 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console', 'error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'collabhub': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Ensure logs directory exists
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
