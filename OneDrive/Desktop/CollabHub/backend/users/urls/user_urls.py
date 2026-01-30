@@ -25,6 +25,7 @@ urlpatterns = [
     path('me/', CurrentUserView.as_view(), name='current_user'),
     path('me/password/', ChangePasswordView.as_view(), name='change_password'),
     path('me/skills/', UserSkillsView.as_view(), name='user_skills'),
+    path('me/skills/<int:pk>/', UserSkillDetailView.as_view(), name='user_skill_detail'),
     
     # Dashboard endpoints
     path('me/dashboard/stats/', DashboardStatsView.as_view(), name='dashboard_stats'),

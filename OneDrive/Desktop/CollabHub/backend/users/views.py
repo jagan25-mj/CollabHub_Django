@@ -204,10 +204,15 @@ class SkillListView(generics.ListCreateAPIView):
 
 
 class UserSkillsView(APIView):
-    """Manage current user's skills."""
-    
+    """Manage current user's skills.
+
+    Backwards-compatible: accepts frontend payloads that use either `skill_id` or
+    `skill` (existing id). If `name` is provided and no matching Skill exists,
+    a new Skill will be created (category defaults to `other`).
+    """
+
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request):
         """Get current user's skills."""
         user_skills = UserSkill.objects.filter(user=request.user).select_related('skill')
@@ -217,44 +222,82 @@ class UserSkillsView(APIView):
             'proficiency': us.proficiency
         } for us in user_skills]
         return Response(data)
-    
+
     def post(self, request):
-        """Add a skill to current user."""
-        skill_id = request.data.get('skill_id')
+        """Add a skill to current user.
+
+        Supported payloads (backwards-compatible):
+        - { "skill_id": 1, "proficiency": "advanced" }
+        - { "skill": 1, "proficiency": "advanced" }
+        - { "name": "FastAPI", "proficiency": "intermediate" }
+        """
+        skill_id = request.data.get('skill_id') or request.data.get('skill')
+        name = request.data.get('name')
         proficiency = request.data.get('proficiency', 'intermediate')
-        
-        try:
-            skill = Skill.objects.get(id=skill_id)
-        except Skill.DoesNotExist:
-            return Response({
-                'error': 'Skill not found'
-            }, status=status.HTTP_404_NOT_FOUND)
-        
+
+        # If name provided but no id, create or get the Skill
+        if not skill_id and name:
+            skill, _ = Skill.objects.get_or_create(name__iexact=name.strip(), defaults={'name': name.strip(), 'category': request.data.get('category', 'other')})
+        elif skill_id:
+            try:
+                skill = Skill.objects.get(id=skill_id)
+            except Skill.DoesNotExist:
+                return Response({'error': 'Skill not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'error': 'Provide skill_id or name'}, status=status.HTTP_400_BAD_REQUEST)
+
         user_skill, created = UserSkill.objects.get_or_create(
             user=request.user,
             skill=skill,
             defaults={'proficiency': proficiency}
         )
-        
+
         if not created:
             user_skill.proficiency = proficiency
             user_skill.save()
-        
+
         return Response({
             'id': user_skill.id,
             'skill': SkillSerializer(skill).data,
             'proficiency': user_skill.proficiency
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
-    
-    def delete(self, request):
-        """Remove a skill from current user."""
-        skill_id = request.data.get('skill_id')
-        
+
+
+class UserSkillDetailView(APIView):
+    """Detail view for a single UserSkill (used by frontend DELETE/PATCH)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, pk, user):
         try:
-            user_skill = UserSkill.objects.get(user=request.user, skill_id=skill_id)
-            user_skill.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return UserSkill.objects.select_related('skill').get(pk=pk, user=user)
         except UserSkill.DoesNotExist:
-            return Response({
-                'error': 'Skill not found in your profile'
-            }, status=status.HTTP_404_NOT_FOUND)
+            return None
+
+    def get(self, request, pk):
+        obj = self.get_object(pk, request.user)
+        if not obj:
+            return Response({'error': 'User skill not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({
+            'id': obj.id,
+            'skill': SkillSerializer(obj.skill).data,
+            'proficiency': obj.proficiency
+        })
+
+    def patch(self, request, pk):
+        obj = self.get_object(pk, request.user)
+        if not obj:
+            return Response({'error': 'User skill not found'}, status=status.HTTP_404_NOT_FOUND)
+        proficiency = request.data.get('proficiency')
+        if proficiency:
+            obj.proficiency = proficiency
+            obj.save()
+        return Response({'id': obj.id, 'proficiency': obj.proficiency})
+
+    def delete(self, request, pk):
+        obj = self.get_object(pk, request.user)
+        if not obj:
+            return Response({'error': 'User skill not found'}, status=status.HTTP_404_NOT_FOUND)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+

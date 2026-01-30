@@ -290,14 +290,14 @@
                     // Move user from suggested to pending
                     suggestedUsers = suggestedUsers.filter(u => u.id !== userId);
                     renderSuggested();
-                    alert('Connection request sent!');
+                    showToast('Connection request sent!', 'success');
                 } else {
-                    const error = await res.json();
-                    alert('Error: ' + (error.error || 'Failed to send connection'));
+                    const error = await res.json().catch(() => ({}));
+                    showToast(error.error || 'Failed to send connection', 'error');
                 }
             } catch (error) {
                 console.error('Error sending connection:', error);
-                alert('An error occurred');
+                showToast('An error occurred', 'error');
             }
         }
 
@@ -313,13 +313,15 @@
                 });
 
                 if (res.ok) {
-                    loadNetwork(); // Reload network data
+                    await loadNetwork(); // Reload network data
+                    showToast(`Request ${action}ed`, 'success');
                 } else {
-                    alert('Failed to ' + action);
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.error || `Failed to ${action}`, 'error');
                 }
             } catch (error) {
                 console.error('Error responding to connection:', error);
-                alert('An error occurred');
+                showToast('An error occurred', 'error');
             }
         }
 

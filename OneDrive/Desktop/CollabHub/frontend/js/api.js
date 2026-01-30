@@ -249,6 +249,51 @@ const api = {
         return response.json();
     },
 
+    // Startup updates (feed)
+    async getStartupUpdates(startupId, params = {}) {
+        const query = new URLSearchParams(params).toString();
+        const response = await apiRequest(`/startups/${startupId}/updates/?${query}`);
+        if (!response.ok) throw new Error('Failed to fetch updates');
+        return response.json();
+    },
+
+    async postStartupUpdate(startupId, data) {
+        const response = await apiRequest(`/startups/${startupId}/updates/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Failed to post update');
+        }
+        return response.json();
+    },
+
+    // Express interest (talent) and investor interest
+    async expressInterest(startupId, data = {}) {
+        const response = await apiRequest(`/startups/${startupId}/interest/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Failed to express interest');
+        }
+        return response.json();
+    },
+
+    async investorInterest(startupId, data = {}) {
+        const response = await apiRequest(`/startups/${startupId}/investor-interest/`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Failed to express investor interest');
+        }
+        return response.json();
+    },
+
     // Opportunities
     async getOpportunities(params = {}) {
         const query = new URLSearchParams(params).toString();

@@ -408,20 +408,39 @@
             }
 
             try {
-                const skill = allSkills.find(s => s.name.toLowerCase() === skillName.toLowerCase());
-                const skillId = skill ? skill.id : null;
+                // Try to find existing skill
+                let skill = allSkills.find(s => s.name.toLowerCase() === skillName.toLowerCase());
+                let skillId = skill ? skill.id : null;
 
+                // If skill doesn't exist, create it first (use canonical API)
+                if (!skillId) {
+                    const createRes = await fetch('/api/v1/users/skills/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                        },
+                        body: JSON.stringify({ name: skillName, category: 'other' })
+                    });
+
+                    if (!createRes.ok) {
+                        const err = await createRes.json().catch(() => ({}));
+                        showToast(err.detail || 'Failed to create skill', 'error');
+                        return;
+                    }
+
+                    const created = await createRes.json();
+                    skillId = created.id;
+                }
+
+                // Attach skill to user using canonical payload (skill_id)
                 const res = await fetch('/api/v1/users/me/skills/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
                     },
-                    body: JSON.stringify({
-                        skill: skillId,
-                        name: skillName,
-                        proficiency: proficiency
-                    })
+                    body: JSON.stringify({ skill_id: skillId, proficiency })
                 });
 
                 if (res.ok) {
@@ -430,7 +449,8 @@
                     showToast('Skill added successfully', 'success');
                     calculateProfileCompletion();
                 } else {
-                    showToast('Error adding skill', 'error');
+                    const err = await res.json().catch(() => ({}));
+                    showToast(err.error || err.detail || 'Error adding skill', 'error');
                 }
             } catch (error) {
                 console.error('Error adding skill:', error);

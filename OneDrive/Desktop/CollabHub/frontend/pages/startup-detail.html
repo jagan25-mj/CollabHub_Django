@@ -135,6 +135,22 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Updates Section -->
+                    <div id="updates-section" class="bg-white/5 rounded-2xl border border-white/10 p-6 hidden">
+                        <h2 class="text-lg font-semibold text-white mb-4">Updates</h2>
+                        <div id="updates-list" class="space-y-4 text-gray-300 text-sm">
+                            <p>Loading updates...</p>
+                        </div>
+                        <!-- Founder-only: quick post UI (rendered dynamically) -->
+                        <div id="post-update-box" class="mt-4 hidden">
+                            <textarea id="update-content" rows="3" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none" placeholder="Share a progress update..."></textarea>
+                            <div class="flex gap-3 mt-3">
+                                <input id="update-image" type="url" placeholder="Image URL (optional)" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none" />
+                                <button id="post-update-btn" class="px-4 py-2 bg-primary-500 text-white rounded-lg">Post</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Sidebar -->
@@ -169,38 +185,46 @@
     <!-- Apply Modal (reuse from startups) -->
     <div id="apply-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
         <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
-            <h2 class="text-2xl font-bold text-white mb-2">Apply to Startup</h2>
-            <p id="apply-startup-name" class="text-gray-400 text-sm mb-6"></p>
-            
+            <h2 class="text-2xl font-bold text-white mb-2">Apply to Opportunity</h2>
+            <p id="apply-startup-name" class="text-gray-400 text-sm mb-4"></p>
+
             <form id="apply-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Select Opportunity</label>
+                    <select id="apply-opportunity" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none" required>
+                        <!-- Populated dynamically with startup opportunities -->
+                    </select>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Cover Letter</label>
                     <textarea id="cover-letter" placeholder="Tell them why you're interested..." 
                         class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none" 
                         rows="4" required></textarea>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Portfolio Link (optional)</label>
                     <input type="url" id="portfolio-link" placeholder="https://..." 
                         class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Resume URL (optional)</label>
                     <input type="url" id="resume-link" placeholder="https://..." 
                         class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none">
                 </div>
-                
+
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+                    <button id="apply-submit" type="submit" class="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
                         Submit Application
                     </button>
-                    <button type="button" onclick="closeApplyModal()" class="flex-1 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
+                    <button type="button" onclick="closeApplyModal()" class="flex-1 px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
                         Cancel
                     </button>
                 </div>
             </form>
+            <p id="apply-no-opps" class="text-yellow-400 text-sm mt-3 hidden">No open opportunities available — check back later.</p>
         </div>
     </div>
 
@@ -245,6 +269,9 @@
                 
                 // Load save/follow status from API
                 await loadSaveFollowStatus(startupId);
+
+                // Load updates for this startup
+                await loadStartupUpdates(startupId).catch(() => {});
                 
                 renderStartupDetails();
             } catch (error) {
@@ -379,11 +406,17 @@
             }
 
             // Action buttons
+            // Action buttons (role-aware)
+            const isTalent = currentUser?.role === 'talent' || currentUser?.role === 'student';
+            const isInvestor = currentUser?.role === 'investor';
+
             document.getElementById('action-buttons').innerHTML = `
                 <button onclick="openApplyModal('${startup.id}', '${startup.name}')" 
                     class="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
                     Apply
                 </button>
+                ${isTalent ? `<button onclick="expressInterest(${startup.id})" class="w-full px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium">Express Interest</button>` : ''}
+                ${isInvestor ? `<button onclick="investorInterest(${startup.id})" class="w-full px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors font-medium">Investor Interest</button>` : ''}
                 <button onclick="toggleSaveStartup(${startup.id})"
                     class="w-full px-4 py-2 ${isSaved ? 'bg-yellow-500/20 text-yellow-400' : 'bg-white/10 text-white'} rounded-lg hover:bg-white/20 transition-colors font-medium">
                     ${isSaved ? '⭐ Saved' : '☆ Save Startup'}
@@ -415,6 +448,9 @@
                 </div>
                 ` : ''}
             `;
+
+            // Updates (populated after render)
+            document.getElementById('updates-section')?.classList.remove('hidden');
         }
 
         // Apply modal
@@ -428,13 +464,46 @@
             document.getElementById('apply-form').reset();
         }
 
+        // Populate opportunity selector when opening modal
+        function openApplyModal(startupId, startupName) {
+            const sel = document.getElementById('apply-opportunity');
+            const noOpps = document.getElementById('apply-no-opps');
+            sel.innerHTML = '';
+
+            const opportunities = (startup && startup.opportunities) || [];
+            if (opportunities.length === 0) {
+                sel.classList.add('hidden');
+                noOpps.classList.remove('hidden');
+                document.getElementById('apply-submit').disabled = true;
+            } else {
+                noOpps.classList.add('hidden');
+                sel.classList.remove('hidden');
+                opportunities.forEach(opp => {
+                    const opt = document.createElement('option');
+                    opt.value = opp.id;
+                    opt.textContent = `${opp.title} • ${opp.type} • ${opp.location || 'Remote'}`;
+                    sel.appendChild(opt);
+                });
+                document.getElementById('apply-submit').disabled = false;
+            }
+
+            document.getElementById('apply-startup-name').textContent = `Apply to ${startupName}`;
+            document.getElementById('apply-modal').classList.remove('hidden');
+        }
+
         document.getElementById('apply-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!startup) return;
 
+            const opportunityId = parseInt(document.getElementById('apply-opportunity').value, 10);
             const coverLetter = document.getElementById('cover-letter').value;
             const portfolioLink = document.getElementById('portfolio-link').value;
             const resumeLink = document.getElementById('resume-link').value;
+
+            if (!opportunityId) {
+                showToast('Please select an opportunity before applying', 'error');
+                return;
+            }
 
             try {
                 const res = await fetch('/api/v1/collaborations/applications/', {
@@ -444,10 +513,10 @@
                         'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
                     },
                     body: JSON.stringify({
-                        startup: startup.id,
+                        opportunity: opportunityId,
                         cover_letter: coverLetter,
-                        portfolio_link: portfolioLink,
-                        resume_link: resumeLink
+                        portfolio_url: portfolioLink || null,
+                        resume_url: resumeLink || null
                     })
                 });
 
@@ -455,8 +524,8 @@
                     showToast('Application submitted successfully!', 'success');
                     closeApplyModal();
                 } else {
-                    const data = await res.json();
-                    showToast(data.detail || 'Error submitting application', 'error');
+                    const data = await res.json().catch(() => ({}));
+                    showToast(data.detail || data.error || 'Error submitting application', 'error');
                 }
             } catch (error) {
                 console.error('Error submitting application:', error);
@@ -546,6 +615,77 @@
                 showToast('Failed to update follow status', 'error');
             }
         }
+
+        // Express interest (talent)
+        async function expressInterest(startupId) {
+            try {
+                await window.CollabHubAPI.api.expressInterest(startupId, { message: '' });
+                showToast('Interest sent — founder will be notified', 'success');
+            } catch (err) {
+                console.error('Error expressing interest:', err);
+                showToast(err.message || 'Failed to express interest', 'error');
+            }
+        }
+
+        // Investor interest
+        async function investorInterest(startupId) {
+            try {
+                await window.CollabHubAPI.api.investorInterest(startupId, { message: '' });
+                showToast('Investor interest sent — founder will be notified', 'success');
+            } catch (err) {
+                console.error('Error expressing investor interest:', err);
+                showToast(err.message || 'Failed to express investor interest', 'error');
+            }
+        }
+
+        // Load and render startup updates
+        async function loadStartupUpdates(startupId) {
+            try {
+                const data = await window.CollabHubAPI.api.getStartupUpdates(startupId);
+                const updates = Array.isArray(data) ? data : data.results || [];
+                const container = document.getElementById('updates-list');
+                if (!updates || updates.length === 0) {
+                    container.innerHTML = '<div class="p-4 text-gray-400">No updates yet</div>';
+                    return;
+                }
+                container.innerHTML = updates.map(u => `\
+                    <div class="p-4 bg-white/5 rounded-xl border border-white/10">\
+                        <div class="flex justify-between items-start mb-2">\
+                            <div>\
+                                <h4 class="text-white font-semibold">${u.title || 'Update'}</h4>\
+                                <p class="text-gray-400 text-sm">${u.author?.first_name || u.author?.username} • ${new Date(u.created_at).toLocaleString()}</p>\
+                            </div>\
+                        </div>\
+                        <p class="text-gray-300 text-sm mt-2">${u.content}</p>\
+                        ${u.image_url ? `<img src="${u.image_url}" alt="update image" class="mt-3 rounded-lg w-full object-cover"/>` : ''}\
+                    </div>\
+                `).join('');
+
+                // Show updates section
+                document.getElementById('updates-section').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading updates:', error);
+                document.getElementById('updates-list').innerHTML = '<div class="p-4 text-red-400">Failed to load updates</div>';
+            }
+        }
+
+        // Post update (founder/member)
+        document.getElementById('post-update-btn')?.addEventListener('click', async () => {
+            const content = document.getElementById('update-content').value.trim();
+            const image = document.getElementById('update-image').value.trim() || null;
+            if (!content) return showToast('Please enter an update', 'error');
+
+            try {
+                await window.CollabHubAPI.api.postStartupUpdate(startup.id, { title: content.substring(0, 60), content, image_url: image });
+                showToast('Update posted', 'success');
+                document.getElementById('update-content').value = '';
+                document.getElementById('update-image').value = '';
+                await loadStartupUpdates(startup.id);
+            } catch (err) {
+                console.error('Error posting update:', err);
+                showToast(err.message || 'Failed to post update', 'error');
+            }
+        });
 
         // Initialize
         loadStartup();

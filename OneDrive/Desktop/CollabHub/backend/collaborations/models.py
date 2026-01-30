@@ -211,3 +211,34 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.user.email}: {self.title}"
+
+
+class Interest(models.Model):
+    """Represents a non-application expression of interest from a user to a startup."""
+
+    class Type(models.TextChoices):
+        TALENT = 'talent', 'Talent Interest'
+        INVESTOR = 'investor', 'Investor Interest'
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='interests'
+    )
+    startup = models.ForeignKey(
+        'startups.Startup',
+        on_delete=models.CASCADE,
+        related_name='interests'
+    )
+    type = models.CharField(max_length=20, choices=Type.choices)
+    message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'interests'
+        indexes = [models.Index(fields=['startup', '-created_at']), models.Index(fields=['user', '-created_at'])]
+        ordering = ['-created_at']
+        unique_together = ['user', 'startup', 'type']
+
+    def __str__(self):
+        return f"{self.user.email} -> {self.startup.name} ({self.type})"
