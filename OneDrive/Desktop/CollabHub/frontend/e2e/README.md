@@ -1,9 +1,19 @@
-Playwright/Cypress tests (stub)
+Playwright E2E — CollabHub (phase 5)
 
-This folder contains E2E test stubs for the Phase 5 flows. To run these locally:
+Quickstart (local):
 
-1. Install node and the test runner of your choice (Playwright recommended):
-   - npm init -y
+1. Start backend (in project root):
+   cd OneDrive/Desktop/CollabHub/backend
+   python -m venv .venv && source .venv/bin/activate
+   pip install -r requirements.txt
+   python manage.py migrate
+   python manage.py runserver
+
+2. In a separate terminal run:
+   cd OneDrive/Desktop/CollabHub/frontend/e2e
+   npm ci
+   npx playwright install
+   npm run test:e2e
    - npm i -D @playwright/test
    - npx playwright install
 
