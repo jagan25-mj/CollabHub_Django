@@ -49,12 +49,19 @@ class DashboardStatsView(APIView):
         recent_interactions = applications.filter(
             applied_at__gte=timezone.now() - timedelta(days=30)
         ).count()
+
+        # Recent interests expressed by the user (talent/investor)
+        from collaborations.models import Interest
+        recent_interests = Interest.objects.filter(
+            user=user,
+            created_at__gte=timezone.now() - timedelta(days=30)
+        ).count()
         
         # Get matches/recommendations count (based on skills)
         matches_count = self.get_matches_count(user)
         
         return Response({
-            'interests_sent': recent_interactions,
+            'interests_sent': recent_interests or recent_interactions,
             'active_teams': team_memberships,
             'matches_found': matches_count,
             'profile_completion': profile_completion,

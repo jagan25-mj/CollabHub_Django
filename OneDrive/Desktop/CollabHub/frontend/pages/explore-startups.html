@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Explore Startups — CollabHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans">
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+
+  <main class="pt-24 pb-20 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-white">Explore Startups</h1>
+          <p class="text-gray-400">Search, filter and discover startups</p>
+        </div>
+        <div class="flex gap-3">
+          <input id="explore-search" class="px-4 py-2 rounded-lg bg-white/5 text-white border border-white/10" placeholder="Search startups" />
+          <button id="explore-clear" class="px-4 py-2 bg-white/10 text-white rounded-lg">Clear</button>
+        </div>
+      </div>
+
+      <div id="explore-list" class="grid md:grid-cols-3 gap-6">
+        <div class="col-span-3 text-gray-400">Loading startups…</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    if (!window.CollabHubAPI.isAuthenticated()) window.location.href = '/app/login?redirect=' + encodeURIComponent(window.location.href);
+    const user = window.CollabHubAPI.getUserData();
+
+    async function loadExplore(q = '') {
+      try {
+        const data = await window.CollabHubAPI.api.getStartups({ search: q, page_size: 24 });
+        const items = Array.isArray(data) ? data : data.results || [];
+        const container = document.getElementById('explore-list');
+        if (!items.length) return container.innerHTML = '<div class="col-span-3 text-gray-400">No startups found</div>';
+
+        container.innerHTML = items.map(s => `
+          <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center text-white font-bold">${(s.name?.[0]||'S').toUpperCase()}</div>
+              <div class="flex-1">
+                <h3 class="text-white font-semibold">${s.name}</h3>
+                <p class="text-gray-400 text-sm mt-1">${s.tagline || s.industry || ''}</p>
+                <div class="mt-4 flex gap-2">
+                  ${user.role === 'talent' ? `<button onclick="expressInterest(${s.id})" class="px-3 py-2 bg-emerald-500 text-white rounded-lg">I'm Interested</button>` : ''}
+                  ${user.role === 'investor' ? `<button onclick="investorInterest(${s.id})" class="px-3 py-2 bg-indigo-500 text-white rounded-lg">Investor Interest</button>` : ''}
+                  <a href="/app/startup-detail?id=${s.id}" class="px-3 py-2 bg-white/10 text-white rounded-lg">View</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to load startups', 'error');
+      }
+    }
+
+    document.getElementById('explore-search').addEventListener('input', debounce(e => loadExplore(e.target.value), 300));
+    document.getElementById('explore-clear').addEventListener('click', () => { document.getElementById('explore-search').value = ''; loadExplore(''); });
+
+    // Wire interest helpers to API client
+    async function expressInterest(startupId) {
+      try {
+        await window.CollabHubAPI.api.expressInterest(startupId, { message: '' });
+        showToast('Interest sent', 'success');
+      } catch (err) {
+        showToast(err.message || 'Failed to send interest', 'error');
+      }
+    }
+    async function investorInterest(startupId) {
+      try {
+        await window.CollabHubAPI.api.investorInterest(startupId, { message: '' });
+        showToast('Investor interest sent', 'success');
+      } catch (err) {
+        showToast(err.message || 'Failed to send investor interest', 'error');
+      }
+    }
+
+    loadExplore();
+  </script>
+</body>
+</html>

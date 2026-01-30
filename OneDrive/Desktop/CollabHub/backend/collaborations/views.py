@@ -111,6 +111,78 @@ class StartupApplicationsView(generics.ListAPIView):
         ).select_related('applicant', 'opportunity')
 
 
+class ExpressInterestView(generics.CreateAPIView):
+    """Talent can express non-application interest in a startup."""
+
+    serializer_class = InterestSerializer = getattr(__import__('collaborations.serializers', fromlist=['InterestSerializer']), 'InterestSerializer')
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, startup_id):
+        data = request.data.copy()
+        data['startup_id'] = startup_id
+        data['type'] = 'talent'
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        interest = serializer.save(user=request.user)
+
+        # Notify founder
+        from startups.models import Startup
+        startup = Startup.objects.get(pk=startup_id)
+        Notification.objects.create(
+            user=startup.founder,
+            type=Notification.Type.CONNECTION,
+            title='New interest in your startup',
+            message=f"{request.user.get_full_name() or request.user.email} is interested in {startup.name}",
+            related_user=request.user,
+            link=f'/app/startup-detail?id={startup.id}'
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class InvestorInterestView(generics.CreateAPIView):
+    """Investors can express interest in a startup."""
+
+    serializer_class = getattr(__import__('collaborations.serializers', fromlist=['InterestSerializer']), 'InterestSerializer')
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, startup_id):
+        data = request.data.copy()
+        data['startup_id'] = startup_id
+        data['type'] = 'investor'
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        interest = serializer.save(user=request.user)
+
+        # Notify founder
+        from startups.models import Startup
+        startup = Startup.objects.get(pk=startup_id)
+        Notification.objects.create(
+            user=startup.founder,
+            type=Notification.Type.CONNECTION,
+            title='Investor expressed interest',
+            message=f"{request.user.get_full_name() or request.user.email} is interested in investing in {startup.name}",
+            related_user=request.user,
+            link=f'/app/startup-detail?id={startup.id}'
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class StartupInterestsView(generics.ListAPIView):
+    """List interests for a startup (founder only)."""
+
+    serializer_class = getattr(__import__('collaborations.serializers', fromlist=['InterestSerializer']), 'InterestSerializer')
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        startup_id = self.kwargs['startup_id']
+        return getattr(__import__('collaborations.models', fromlist=['Interest']), 'Interest').objects.filter(
+            startup_id=startup_id,
+            startup__founder=self.request.user
+        ).select_related('user')
+
+
 class ApplicationStatusUpdateView(APIView):
     """
     Update application status (for founders).

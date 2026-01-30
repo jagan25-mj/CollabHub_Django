@@ -27,6 +27,9 @@ urlpatterns = [
     path('applications/<int:pk>/status/', ApplicationStatusUpdateView.as_view(), name='application_status'),
     path('opportunities/<int:opportunity_id>/applications/', OpportunityApplicationsView.as_view(), name='opportunity_applications'),
     path('startups/<int:startup_id>/applications/', StartupApplicationsView.as_view(), name='startup_applications'),
+    path('startups/<int:startup_id>/interest/', ExpressInterestView.as_view(), name='express_interest'),
+    path('startups/<int:startup_id>/investor-interest/', InvestorInterestView.as_view(), name='investor_interest'),
+    path('startups/<int:startup_id>/interests/', StartupInterestsView.as_view(), name='startup_interests'),
     
     # Team Invitations
     path('invitations/', TeamInvitationListCreateView.as_view(), name='invitation_list'),
