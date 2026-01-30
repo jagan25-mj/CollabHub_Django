@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Details - CollabHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-slate-900/80 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="/" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">C</span>
+                    </div>
+                    <span class="text-white font-bold text-xl">CollabHub</span>
+                </a>
+
+                <div id="authenticated-nav" class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a>
+                    <a href="/app/startups" class="text-gray-300 hover:text-white transition-colors">Explore Startups</a>
+                    <a href="/app/network" class="text-gray-300 hover:text-white transition-colors">Network</a>
+                    <a href="#" id="dashboard-link" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                    <a href="/app/messages" class="text-gray-300 hover:text-white transition-colors">Messages</a>
+                </div>
+
+                <div id="authenticated-actions" class="hidden items-center space-x-6">
+                    <div class="relative">
+                        <button id="notification-bell" class="text-gray-300 hover:text-white transition-colors relative" title="Notifications">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <span id="notification-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                        </button>
+                        <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-slate-800 rounded-lg border border-white/10 shadow-xl max-h-96 overflow-y-auto z-50">
+                            <div class="p-4 border-b border-white/10 flex justify-between items-center">
+                                <h3 class="text-white font-semibold">Notifications</h3>
+                                <button id="clear-all-notifications" class="text-xs text-gray-400 hover:text-white transition-colors">Clear All</button>
+                            </div>
+                            <div id="notification-items" class="divide-y divide-white/10">
+                                <div class="p-4 text-center text-gray-400 text-sm">Loading notifications...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/app/profile" class="text-gray-300 hover:text-white transition-colors">Profile</a>
+                    <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Back Button -->
+            <button onclick="window.history.back()" class="mb-6 flex items-center text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back
+            </button>
+
+            <!-- Startup Header -->
+            <div id="startup-header" class="bg-white/5 rounded-2xl border border-white/10 overflow-hidden mb-8">
+                <!-- Skeleton loader -->
+                <div class="animate-pulse p-8">
+                    <div class="h-12 bg-white/10 rounded mb-4 w-1/3"></div>
+                    <div class="h-4 bg-white/10 rounded w-1/2"></div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Details Column -->
+                <div class="md:col-span-2 space-y-6">
+                    <!-- About Section -->
+                    <div id="about-section" class="bg-white/5 rounded-2xl border border-white/10 p-6">
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-6 bg-white/10 rounded w-1/4"></div>
+                            <div class="space-y-2">
+                                <div class="h-4 bg-white/10 rounded"></div>
+                                <div class="h-4 bg-white/10 rounded"></div>
+                                <div class="h-4 bg-white/10 rounded w-2/3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Founder Section -->
+                    <div id="founder-section" class="bg-white/5 rounded-2xl border border-white/10 p-6">
+                        <div class="animate-pulse">
+                            <div class="h-6 bg-white/10 rounded w-1/4 mb-4"></div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 bg-white/10 rounded-full"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="h-4 bg-white/10 rounded w-1/3"></div>
+                                    <div class="h-4 bg-white/10 rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Section -->
+                    <div id="team-section" class="bg-white/5 rounded-2xl border border-white/10 p-6">
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-6 bg-white/10 rounded w-1/4"></div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="text-center p-4 bg-white/5 rounded">
+                                    <div class="w-12 h-12 bg-white/10 rounded-full mx-auto mb-2"></div>
+                                    <div class="h-3 bg-white/10 rounded"></div>
+                                </div>
+                                <div class="text-center p-4 bg-white/5 rounded">
+                                    <div class="w-12 h-12 bg-white/10 rounded-full mx-auto mb-2"></div>
+                                    <div class="h-3 bg-white/10 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Opportunities Section -->
+                    <div id="opportunities-section" class="bg-white/5 rounded-2xl border border-white/10 p-6">
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-6 bg-white/10 rounded w-1/4 mb-4"></div>
+                            <div class="space-y-2">
+                                <div class="p-4 bg-white/5 rounded space-y-2">
+                                    <div class="h-4 bg-white/10 rounded w-1/3"></div>
+                                    <div class="h-3 bg-white/10 rounded w-1/2"></div>
+                                </div>
+                                <div class="p-4 bg-white/5 rounded space-y-2">
+                                    <div class="h-4 bg-white/10 rounded w-1/3"></div>
+                                    <div class="h-3 bg-white/10 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Action Buttons -->
+                    <div id="action-buttons" class="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-3">
+                        <div class="animate-pulse space-y-3">
+                            <div class="h-10 bg-white/10 rounded"></div>
+                            <div class="h-10 bg-white/10 rounded"></div>
+                            <div class="h-10 bg-white/10 rounded"></div>
+                        </div>
+                    </div>
+
+                    <!-- Info Card -->
+                    <div id="info-card" class="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
+                        <div class="animate-pulse space-y-4">
+                            <div>
+                                <div class="h-3 bg-white/10 rounded w-1/4 mb-2"></div>
+                                <div class="h-4 bg-white/10 rounded"></div>
+                            </div>
+                            <div>
+                                <div class="h-3 bg-white/10 rounded w-1/4 mb-2"></div>
+                                <div class="h-4 bg-white/10 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Apply Modal (reuse from startups) -->
+    <div id="apply-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+        <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-white/10">
+            <h2 class="text-2xl font-bold text-white mb-2">Apply to Startup</h2>
+            <p id="apply-startup-name" class="text-gray-400 text-sm mb-6"></p>
+            
+            <form id="apply-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Cover Letter</label>
+                    <textarea id="cover-letter" placeholder="Tell them why you're interested..." 
+                        class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none" 
+                        rows="4" required></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Portfolio Link (optional)</label>
+                    <input type="url" id="portfolio-link" placeholder="https://..." 
+                        class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Resume URL (optional)</label>
+                    <input type="url" id="resume-link" placeholder="https://..." 
+                        class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none">
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+                        Submit Application
+                    </button>
+                    <button type="button" onclick="closeApplyModal()" class="flex-1 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        if (!window.CollabHubAPI.isAuthenticated()) {
+            window.location.href = '/app/login?redirect=' + encodeURIComponent(window.location.href);
+        }
+
+        const currentUser = window.CollabHubAPI.getUserData();
+        let startup = null;
+        let isSaved = false;
+        let isFollowing = false;
+
+        // Get startup ID from URL
+        function getStartupId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // Load startup details
+        async function loadStartup() {
+            const startupId = getStartupId();
+            if (!startupId) {
+                window.location.href = '/app/startups';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/v1/startups/${startupId}/`, {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+
+                if (!res.ok) {
+                    showToast('Startup not found', 'error');
+                    setTimeout(() => window.location.href = '/app/startups', 2000);
+                    return;
+                }
+
+                startup = await res.json();
+                
+                // Load save/follow status from API
+                await loadSaveFollowStatus(startupId);
+                
+                renderStartupDetails();
+            } catch (error) {
+                console.error('Error loading startup:', error);
+                showToast('Error loading startup', 'error');
+            }
+        }
+
+        // Load save/follow status from API
+        async function loadSaveFollowStatus(startupId) {
+            try {
+                const token = window.CollabHubAPI.getAccessToken();
+                
+                // Get user's saved startups
+                const savedRes = await fetch('/api/v1/startups/my/saved/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (savedRes.ok) {
+                    const savedData = await savedRes.json();
+                    const savedList = Array.isArray(savedData) ? savedData : savedData.results || [];
+                    isSaved = savedList.some(item => item.startup.id === parseInt(startupId));
+                }
+                
+                // Get user's following startups
+                const followingRes = await fetch('/api/v1/startups/my/following/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (followingRes.ok) {
+                    const followingData = await followingRes.json();
+                    const followingList = Array.isArray(followingData) ? followingData : followingData.results || [];
+                    isFollowing = followingList.some(item => item.startup.id === parseInt(startupId));
+                }
+            } catch (error) {
+                console.error('Error loading save/follow status:', error);
+                // Fall back to localStorage as backup
+                const saved = JSON.parse(localStorage.getItem('saved_startups') || '[]');
+                const following = JSON.parse(localStorage.getItem('following_startups') || '[]');
+                isSaved = saved.includes(parseInt(startupId));
+                isFollowing = following.includes(parseInt(startupId));
+            }
+        }
+
+        // Render startup details
+        function renderStartupDetails() {
+            if (!startup) return;
+
+            // Header
+            const headerHtml = `
+                <div class="relative h-48 bg-gradient-to-r from-primary-500/20 via-secondary-500/20 to-accent-500/20"></div>
+                <div class="px-8 pb-8 relative">
+                    <div class="flex flex-col md:flex-row md:items-end gap-6 -mt-24 mb-6">
+                        <div class="w-32 h-32 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center text-white text-4xl font-bold border-4 border-slate-900">
+                            ${(startup.name?.[0] || 'S').toUpperCase()}
+                        </div>
+                        <div class="flex-1">
+                            <h1 class="text-4xl font-bold text-white mb-2">${startup.name}</h1>
+                            <p class="text-gray-400 mb-3">${startup.tagline || 'A promising startup'}</p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm">${startup.industry || 'Unknown'}</span>
+                                <span class="px-3 py-1 bg-secondary-500/20 text-secondary-400 rounded-full text-sm">${startup.stage || 'Idea'}</span>
+                                <span class="px-3 py-1 bg-accent-500/20 text-accent-400 rounded-full text-sm">${startup.is_remote ? '🌍 Remote' : '📍 On-site'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('startup-header').innerHTML = headerHtml;
+
+            // About
+            document.getElementById('about-section').innerHTML = `
+                <h2 class="text-lg font-semibold text-white mb-4">About</h2>
+                <p class="text-gray-300 leading-relaxed">${startup.description || 'No description available'}</p>
+                ${startup.website ? `<a href="${startup.website}" target="_blank" class="inline-block mt-4 text-primary-400 hover:text-primary-300">Visit Website →</a>` : ''}
+            `;
+
+            // Founder
+            if (startup.founder) {
+                document.getElementById('founder-section').innerHTML = `
+                    <h2 class="text-lg font-semibold text-white mb-4">Founder</h2>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                            ${(startup.founder.first_name?.[0] || 'U').toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 class="text-white font-semibold">${startup.founder.first_name || startup.founder.username}</h3>
+                            <p class="text-gray-400 text-sm">${startup.founder.role || 'Founder'}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('founder-section').innerHTML = '<p class="text-gray-400">Founder info not available</p>';
+            }
+
+            // Team
+            const teamMembers = startup.members || [];
+            if (teamMembers.length > 0) {
+                document.getElementById('team-section').innerHTML = `
+                    <h2 class="text-lg font-semibold text-white mb-4">Team (${teamMembers.length})</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        ${teamMembers.map(member => {
+                            const user = member.user;
+                            return `
+                                <div class="text-center p-4 bg-white/5 rounded-xl">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2">
+                                        ${(user?.first_name?.[0] || 'U').toUpperCase()}
+                                    </div>
+                                    <p class="text-white text-sm font-medium">${user?.first_name || user?.username || 'Team member'}</p>
+                                    <p class="text-gray-400 text-xs">${member.role || 'Team member'}</p>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            // Opportunities
+            const opportunities = startup.opportunities || [];
+            if (opportunities.length > 0) {
+                document.getElementById('opportunities-section').innerHTML = `
+                    <h2 class="text-lg font-semibold text-white mb-4">Open Opportunities</h2>
+                    <div class="space-y-3">
+                        ${opportunities.map(opp => `
+                            <div class="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-white/30 transition-colors">
+                                <h3 class="text-white font-medium">${opp.title}</h3>
+                                <p class="text-gray-400 text-sm mt-1">${opp.type} • ${opp.location || 'Remote'}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                document.getElementById('opportunities-section').innerHTML = '<p class="text-gray-400 text-sm">No open opportunities at the moment</p>';
+            }
+
+            // Action buttons
+            document.getElementById('action-buttons').innerHTML = `
+                <button onclick="openApplyModal('${startup.id}', '${startup.name}')" 
+                    class="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+                    Apply
+                </button>
+                <button onclick="toggleSaveStartup(${startup.id})"
+                    class="w-full px-4 py-2 ${isSaved ? 'bg-yellow-500/20 text-yellow-400' : 'bg-white/10 text-white'} rounded-lg hover:bg-white/20 transition-colors font-medium">
+                    ${isSaved ? '⭐ Saved' : '☆ Save Startup'}
+                </button>
+                <button onclick="toggleFollowStartup(${startup.id})"
+                    class="w-full px-4 py-2 ${isFollowing ? 'bg-accent-500/20 text-accent-400' : 'bg-white/10 text-white'} rounded-lg hover:bg-white/20 transition-colors font-medium">
+                    ${isFollowing ? '✓ Following' : '+ Follow'}
+                </button>
+            `;
+
+            // Info card
+            document.getElementById('info-card').innerHTML = `
+                <div>
+                    <p class="text-gray-400 text-sm mb-1">Status</p>
+                    <p class="text-white font-medium">${startup.status || 'Active'}</p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-1">Founded</p>
+                    <p class="text-white font-medium">${startup.founded_date ? new Date(startup.founded_date).getFullYear() : 'N/A'}</p>
+                </div>
+                <div>
+                    <p class="text-gray-400 text-sm mb-1">Employees</p>
+                    <p class="text-white font-medium">${startup.team_size || 'Unknown'}</p>
+                </div>
+                ${startup.location ? `
+                <div>
+                    <p class="text-gray-400 text-sm mb-1">Location</p>
+                    <p class="text-white font-medium">📍 ${startup.location}</p>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        // Apply modal
+        function openApplyModal(startupId, startupName) {
+            document.getElementById('apply-startup-name').textContent = `Apply to ${startupName}`;
+            document.getElementById('apply-modal').classList.remove('hidden');
+        }
+
+        function closeApplyModal() {
+            document.getElementById('apply-modal').classList.add('hidden');
+            document.getElementById('apply-form').reset();
+        }
+
+        document.getElementById('apply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!startup) return;
+
+            const coverLetter = document.getElementById('cover-letter').value;
+            const portfolioLink = document.getElementById('portfolio-link').value;
+            const resumeLink = document.getElementById('resume-link').value;
+
+            try {
+                const res = await fetch('/api/v1/collaborations/applications/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                    },
+                    body: JSON.stringify({
+                        startup: startup.id,
+                        cover_letter: coverLetter,
+                        portfolio_link: portfolioLink,
+                        resume_link: resumeLink
+                    })
+                });
+
+                if (res.ok) {
+                    showToast('Application submitted successfully!', 'success');
+                    closeApplyModal();
+                } else {
+                    const data = await res.json();
+                    showToast(data.detail || 'Error submitting application', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting application:', error);
+                showToast('Error submitting application', 'error');
+            }
+        });
+
+        // Save startup (localStorage for Phase 2)
+        async function toggleSaveStartup(startupId) {
+            const previousState = isSaved;
+            isSaved = !isSaved;
+            renderStartupDetails();
+
+            try {
+                if (isSaved) {
+                    // Save startup
+                    const res = await fetch(`/api/v1/startups/${startupId}/save/`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!res.ok) {
+                        throw new Error('Failed to save startup');
+                    }
+                    showToast('Startup saved', 'success');
+                } else {
+                    // Unsave startup
+                    const res = await fetch(`/api/v1/startups/${startupId}/save/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                        }
+                    });
+                    if (!res.ok) {
+                        throw new Error('Failed to unsave startup');
+                    }
+                    showToast('Removed from saved', 'success');
+                }
+            } catch (error) {
+                console.error('Error toggling save status:', error);
+                // Rollback on error
+                isSaved = previousState;
+                renderStartupDetails();
+                showToast('Failed to update save status', 'error');
+            }
+        }
+
+        async function toggleFollowStartup(startupId) {
+            const previousState = isFollowing;
+            isFollowing = !isFollowing;
+            renderStartupDetails();
+
+            try {
+                if (isFollowing) {
+                    // Follow startup
+                    const res = await fetch(`/api/v1/startups/${startupId}/follow/`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!res.ok) {
+                        throw new Error('Failed to follow startup');
+                    }
+                    showToast('Now following', 'success');
+                } else {
+                    // Unfollow startup
+                    const res = await fetch(`/api/v1/startups/${startupId}/follow/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                        }
+                    });
+                    if (!res.ok) {
+                        throw new Error('Failed to unfollow startup');
+                    }
+                    showToast('Unfollowed', 'success');
+                }
+            } catch (error) {
+                console.error('Error toggling follow status:', error);
+                // Rollback on error
+                isFollowing = previousState;
+                renderStartupDetails();
+                showToast('Failed to update follow status', 'error');
+            }
+        }
+
+        // Initialize
+        loadStartup();
+
+        // Navbar initialization
+        document.getElementById('logout-btn')?.addEventListener('click', async () => {
+            await window.CollabHubAPI.api.logout();
+            window.location.href = '/app/login';
+        });
+
+        // Set dashboard link based on user role
+        if (currentUser) {
+            const dashboardLink = document.getElementById('dashboard-link');
+            if (dashboardLink) {
+                if (currentUser.role === 'founder') {
+                    dashboardLink.href = '/app/dashboard-founder';
+                } else if (currentUser.role === 'investor') {
+                    dashboardLink.href = '/app/dashboard-investor';
+                } else {
+                    dashboardLink.href = '/app/dashboard-talent';
+                }
+            }
+        }
+
+        // Initialize notification system (from app.js)
+        if (window.initNotificationSystem) {
+            window.initNotificationSystem();
+        }
+    </script>
+</body>
+</html>
