@@ -5,7 +5,7 @@ Comprehensive tests for API endpoints, models, and permissions.
 Run with: python manage.py test
 """
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
@@ -14,6 +14,7 @@ from startups.models import Startup
 from opportunities.models import Opportunity
 
 
+@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class UserAuthenticationTests(APITestCase):
     """Test user registration and authentication."""
     
@@ -67,6 +68,7 @@ class UserAuthenticationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class StartupAPITests(APITestCase):
     """Test startup CRUD operations and permissions."""
     
@@ -131,6 +133,7 @@ class StartupAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class OpportunityAPITests(APITestCase):
     """Test opportunity CRUD and filtering."""
     
@@ -171,6 +174,7 @@ class OpportunityAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class ApplicationAPITests(APITestCase):
     """Test application workflow."""
     
@@ -226,6 +230,7 @@ class ApplicationAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
+@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class InputValidationTests(APITestCase):
     """Test input validation."""
     

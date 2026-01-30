@@ -6,9 +6,10 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, F
 
 from .models import Application, TeamInvitation, Connection, Notification
+from opportunities.models import Opportunity
 from .serializers import (
     ApplicationSerializer,
     ApplicationCreateSerializer,
@@ -44,9 +45,10 @@ class ApplicationListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         application = serializer.save(applicant=self.request.user)
         
-        # Update opportunity application count
-        application.opportunity.total_applications += 1
-        application.opportunity.save()
+        # Update opportunity application count atomically to prevent race conditions
+        Opportunity.objects.filter(pk=application.opportunity.pk).update(
+            total_applications=F('total_applications') + 1
+        )
         
         # Create notification for opportunity owner
         Notification.objects.create(
@@ -370,11 +372,14 @@ class ConnectionResponseView(APIView):
             connection.status = Connection.Status.ACCEPTED
             connection.save()
             
-            # Update connection counts
-            connection.requester.profile.total_connections += 1
-            connection.requester.profile.save()
-            connection.receiver.profile.total_connections += 1
-            connection.receiver.profile.save()
+            # Update connection counts atomically to prevent race conditions
+            from users.models import Profile
+            Profile.objects.filter(user=connection.requester).update(
+                total_connections=F('total_connections') + 1
+            )
+            Profile.objects.filter(user=connection.receiver).update(
+                total_connections=F('total_connections') + 1
+            )
             
             return Response({'message': 'Connection accepted'})
         
