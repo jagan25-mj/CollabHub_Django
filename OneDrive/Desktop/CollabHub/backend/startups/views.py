@@ -7,22 +7,26 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django.db.models import F
+from django.db.models import F, Q
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 
-from .models import Startup, StartupMember, StartupUpdate
+from .models import Startup, StartupMember, StartupUpdate, SavedStartup, FollowedStartup
 from .serializers import (
     StartupSerializer,
     StartupListSerializer,
     StartupCreateSerializer,
     StartupMemberSerializer,
-    StartupUpdateSerializer
+    StartupUpdateSerializer,
+    SavedStartupSerializer,
+    FollowedStartupSerializer
 )
 from .permissions import IsFounderOrReadOnly
+from collaborations.models import Notification
 
 
 class StartupListCreateView(generics.ListCreateAPIView):
     """
-    GET: List all startups with filtering
+    GET: List all startups with filtering and FTS
     POST: Create a new startup (founders only)
     """
     
@@ -38,6 +42,36 @@ class StartupListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return StartupCreateSerializer
         return StartupListSerializer
+    
+    def get_queryset(self):
+        """
+        Override queryset to support FTS when search parameter is provided.
+        Combines PostgreSQL full-text search with trigram similarity for flexible matching.
+        """
+        queryset = super().get_queryset()
+        
+        # Get search query from request
+        search_query = self.request.query_params.get('search', '').strip()
+        
+        if search_query:
+            # Use PostgreSQL full-text search combined with trigram similarity
+            search_vector = SearchVector('name', weight='A') + \
+                           SearchVector('tagline', weight='B') + \
+                           SearchVector('description', weight='C') + \
+                           SearchVector('industry', weight='B')
+            
+            search_obj = SearchQuery(search_query, search_type='websearch')
+            
+            # Apply FTS and rank results
+            queryset = queryset.annotate(
+                search=search_vector,
+                rank=SearchRank(search_vector, search_obj),
+                similarity=TrigramSimilarity('name', search_query)
+            ).filter(
+                Q(search=search_obj) | Q(similarity__gt=0.1)
+            ).order_by('-rank', '-similarity', '-created_at')
+        
+        return queryset
     
     def perform_create(self, serializer):
         startup = serializer.save(founder=self.request.user)
@@ -56,7 +90,7 @@ class StartupDetailView(generics.RetrieveUpdateDestroyAPIView):
     DELETE: Delete startup (founder only)
     """
     
-    queryset = Startup.objects.select_related('founder').prefetch_related('members__user')
+    queryset = Startup.objects.select_related('founder').prefetch_related('members__user', 'opportunities')
     permission_classes = [permissions.IsAuthenticated, IsFounderOrReadOnly]
     
     def get_serializer_class(self):
@@ -82,7 +116,7 @@ class MyStartupsView(generics.ListAPIView):
         user = self.request.user
         # Get startups where user is founder or member
         return Startup.objects.filter(
-            models.Q(founder=user) | models.Q(members__user=user)
+            Q(founder=user) | Q(members__user=user)
         ).distinct().select_related('founder')
 
 
@@ -156,3 +190,141 @@ class StartupUpdateView(generics.ListCreateAPIView):
             raise PermissionDenied("Only team members can post updates")
         
         serializer.save(startup=startup, author=self.request.user)
+
+
+class SaveStartupView(APIView):
+    """Toggle save status for a startup."""
+    
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        """Save a startup."""
+        try:
+            startup = Startup.objects.get(pk=pk)
+        except Startup.DoesNotExist:
+            return Response({'error': 'Startup not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Prevent user from saving own startup
+        if startup.founder == request.user:
+            return Response(
+                {'error': 'Cannot save your own startup'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        saved, created = SavedStartup.objects.get_or_create(
+            user=request.user,
+            startup=startup
+        )
+        
+        if created:
+            # Create notification for startup founder
+            Notification.objects.create(
+                user=startup.founder,
+                type=Notification.Type.CONNECTION,
+                title='Your startup was saved',
+                message=f'{request.user.get_full_name() or request.user.username} saved your startup {startup.name}',
+                related_user=request.user,
+                link=f'/app/startups?id={startup.id}'
+            )
+            return Response(
+                {'message': 'Startup saved', 'saved': True},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {'message': 'Already saved'},
+                status=status.HTTP_200_OK
+            )
+    
+    def delete(self, request, pk):
+        """Unsave a startup."""
+        try:
+            SavedStartup.objects.get(user=request.user, startup_id=pk).delete()
+            return Response(
+                {'message': 'Startup unsaved'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except SavedStartup.DoesNotExist:
+            return Response(
+                {'error': 'Not saved'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class FollowStartupView(APIView):
+    """Toggle follow status for a startup."""
+    
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        """Follow a startup."""
+        try:
+            startup = Startup.objects.get(pk=pk)
+        except Startup.DoesNotExist:
+            return Response({'error': 'Startup not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Prevent user from following own startup
+        if startup.founder == request.user:
+            return Response(
+                {'error': 'Cannot follow your own startup'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        followed, created = FollowedStartup.objects.get_or_create(
+            user=request.user,
+            startup=startup
+        )
+        
+        if created:
+            # Create notification for startup founder
+            Notification.objects.create(
+                user=startup.founder,
+                type=Notification.Type.CONNECTION,
+                title='New follower',
+                message=f'{request.user.get_full_name() or request.user.username} is now following {startup.name}',
+                related_user=request.user,
+                link=f'/app/startups?id={startup.id}'
+            )
+            return Response(
+                {'message': 'Now following', 'following': True},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {'message': 'Already following'},
+                status=status.HTTP_200_OK
+            )
+    
+    def delete(self, request, pk):
+        """Unfollow a startup."""
+        try:
+            FollowedStartup.objects.get(user=request.user, startup_id=pk).delete()
+            return Response(
+                {'message': 'Startup unfollowed'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except FollowedStartup.DoesNotExist:
+            return Response(
+                {'error': 'Not following'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class MySavedStartupsView(generics.ListAPIView):
+    """List user's saved startups."""
+    
+    serializer_class = SavedStartupSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return SavedStartup.objects.filter(user=self.request.user).select_related('startup').order_by('-created_at')
+
+
+class MyFollowingStartupsView(generics.ListAPIView):
+    """List startups the user is following."""
+    
+    serializer_class = FollowedStartupSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return FollowedStartup.objects.filter(user=self.request.user).select_related('startup').order_by('-created_at')

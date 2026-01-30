@@ -3,8 +3,9 @@ Startups App - Serializers
 """
 
 from rest_framework import serializers
-from .models import Startup, StartupMember, StartupUpdate
+from .models import Startup, StartupMember, StartupUpdate, SavedStartup, FollowedStartup
 from users.serializers import UserListSerializer
+from opportunities.serializers import OpportunityListSerializer
 
 
 class StartupMemberSerializer(serializers.ModelSerializer):
@@ -35,6 +36,7 @@ class StartupSerializer(serializers.ModelSerializer):
     
     founder = UserListSerializer(read_only=True)
     members = StartupMemberSerializer(many=True, read_only=True)
+    opportunities = OpportunityListSerializer(many=True, read_only=True)
     stage_display = serializers.CharField(source='get_stage_display', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     
@@ -44,7 +46,7 @@ class StartupSerializer(serializers.ModelSerializer):
             'id', 'name', 'tagline', 'description', 'logo', 'cover_image',
             'industry', 'stage', 'stage_display', 'status', 'status_display',
             'founded_date', 'location', 'is_remote', 'website', 'pitch_deck_url',
-            'founder', 'team_size', 'members', 'total_views', 'total_applications',
+            'founder', 'team_size', 'members', 'opportunities', 'total_views', 'total_applications',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['founder', 'total_views', 'total_applications', 'created_at', 'updated_at']
@@ -75,3 +77,25 @@ class StartupCreateSerializer(serializers.ModelSerializer):
             'industry', 'stage', 'status', 'founded_date',
             'location', 'is_remote', 'website', 'pitch_deck_url', 'team_size'
         ]
+
+
+class SavedStartupSerializer(serializers.ModelSerializer):
+    """Serializer for saved startups."""
+    
+    startup = StartupListSerializer(read_only=True)
+    
+    class Meta:
+        model = SavedStartup
+        fields = ['id', 'startup', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class FollowedStartupSerializer(serializers.ModelSerializer):
+    """Serializer for followed startups."""
+    
+    startup = StartupListSerializer(read_only=True)
+    
+    class Meta:
+        model = FollowedStartup
+        fields = ['id', 'startup', 'created_at']
+        read_only_fields = ['created_at']

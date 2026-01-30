@@ -104,6 +104,12 @@ class Opportunity(models.Model):
     
     class Meta:
         db_table = 'opportunities'
+        indexes = [
+            models.Index(fields=['created_by', '-created_at']),
+            models.Index(fields=['startup', 'status']),
+            models.Index(fields=['type', 'status']),
+            models.Index(fields=['-created_at']),
+        ]
         ordering = ['-created_at']
         verbose_name_plural = 'Opportunities'
     
@@ -129,6 +135,9 @@ class SavedOpportunity(models.Model):
     class Meta:
         db_table = 'saved_opportunities'
         unique_together = ['user', 'opportunity']
+        indexes = [
+            models.Index(fields=['user', '-saved_at']),
+        ]
     
     def __str__(self):
         return f"{self.user.email} saved {self.opportunity.title}"

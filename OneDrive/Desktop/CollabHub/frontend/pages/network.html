@@ -14,7 +14,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
-                <a href="../index.html" class="flex items-center space-x-2">
+                <a href="/" class="flex items-center space-x-2">
                     <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
                         <span class="text-white font-bold text-xl">C</span>
                     </div>
@@ -23,29 +23,26 @@
 
                 <!-- Unauthenticated Navigation -->
                 <div id="unauthenticated-nav" class="hidden md:flex items-center space-x-8">
-                    <a href="../index.html#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
-                    <a href="opportunities.html" class="text-gray-300 hover:text-white transition-colors">Opportunities</a>
-                    <a href="../index.html#about" class="text-gray-300 hover:text-white transition-colors">About</a>
                 </div>
 
                 <!-- Authenticated Navigation -->
                 <div id="authenticated-nav" class="hidden md:flex items-center space-x-8">
-                    <a href="../index.html" class="text-gray-300 hover:text-white transition-colors">Home</a>
-                    <a href="startups.html" class="text-gray-300 hover:text-white transition-colors">Explore Startups</a>
-                    <a href="network.html" class="text-primary-400 hover:text-primary-300 transition-colors">Network</a>
+                    <a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a>
+                    <a href="/app/startups" class="text-gray-300 hover:text-white transition-colors">Explore Startups</a>
+                    <a href="/app/network" class="text-primary-400 hover:text-primary-300 transition-colors">Network</a>
                     <a href="#" id="dashboard-link" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
-                    <a href="messages.html" class="text-gray-300 hover:text-white transition-colors">Messages</a>
+                    <a href="/app/messages" class="text-gray-300 hover:text-white transition-colors">Messages</a>
                 </div>
 
                 <!-- Unauthenticated Actions -->
                 <div id="unauthenticated-actions" class="flex items-center space-x-4">
-                    <a href="login.html" class="text-gray-300 hover:text-white transition-colors">Sign In</a>
-                    <a href="register.html" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg font-medium hover:opacity-90">Get Started</a>
+                    <a href="/app/login" class="text-gray-300 hover:text-white transition-colors">Sign In</a>
+                    <a href="/app/register" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg font-medium hover:opacity-90">Get Started</a>
                 </div>
 
                 <!-- Authenticated Actions -->
                 <div id="authenticated-actions" class="hidden items-center space-x-4">
-                    <a href="profile.html" class="text-gray-300 hover:text-white transition-colors">Profile</a>
+                    <a href="/app/profile" class="text-gray-300 hover:text-white transition-colors">Profile</a>
                     <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors">Logout</button>
                 </div>
             </div>
@@ -54,23 +51,289 @@
 
     <main class="pt-24 pb-12 px-4">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-white mb-4">Network</h1>
-                <p class="text-gray-400 text-lg max-w-2xl mx-auto">Connect with founders, talent, and investors in your network.</p>
+            <div class="mb-12">
+                <h1 class="text-4xl font-bold text-white mb-2">Your Network</h1>
+                <p class="text-gray-400 text-lg">Connect with founders, talent, and investors</p>
             </div>
 
-            <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-12 border border-white/10 text-center">
-                <div class="text-6xl mb-6">🤝</div>
-                <h2 class="text-2xl font-bold text-white mb-4">Coming Soon</h2>
-                <p class="text-gray-400 mb-6">We're building powerful networking features to help you connect with the right people.</p>
-                <a href="opportunities.html" class="inline-block px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity">
-                    Explore Opportunities Instead
-                </a>
+            <!-- Tabs -->
+            <div class="flex gap-4 mb-8 border-b border-white/10">
+                <button id="tab-suggested" class="px-4 py-3 border-b-2 border-primary-500 text-white font-medium">Suggested Users</button>
+                <button id="tab-requests" class="px-4 py-3 border-b border-transparent text-gray-400 hover:text-white transition-colors">Requests (<span id="request-count">0</span>)</button>
+                <button id="tab-connected" class="px-4 py-3 border-b border-transparent text-gray-400 hover:text-white transition-colors">Connected (<span id="connected-count">0</span>)</button>
+            </div>
+
+            <!-- Suggested Users Tab -->
+            <div id="suggested-tab" class="space-y-4">
+                <div id="suggested-users" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="suggested-empty" class="text-center py-12">
+                    <p class="text-gray-400">No suggestions at this time</p>
+                </div>
+            </div>
+
+            <!-- Requests Tab -->
+            <div id="requests-tab" class="hidden space-y-4">
+                <div id="requests-list" class="space-y-3">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="requests-empty" class="text-center py-12">
+                    <p class="text-gray-400">No pending requests</p>
+                </div>
+            </div>
+
+            <!-- Connected Tab -->
+            <div id="connected-tab" class="hidden space-y-4">
+                <div id="connected-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Populated by JS -->
+                </div>
+                <div id="connected-empty" class="text-center py-12">
+                    <p class="text-gray-400">You haven't connected with anyone yet</p>
+                </div>
             </div>
         </div>
     </main>
 
     <script src="../js/api.js"></script>
     <script src="../js/app.js"></script>
-</body>
-</html>
+    <script>
+        // Check authentication
+        if (!window.CollabHubAPI.isAuthenticated()) {
+            window.location.href = '/app/login';
+        }
+
+        const API = window.CollabHubAPI.api;
+        const currentUser = window.CollabHubAPI.getUserData();
+        let allUsers = [];
+        let suggestedUsers = [];
+        let connectionRequests = [];
+        let connectedUsers = [];
+
+        // Tab switching
+        document.getElementById('tab-suggested').addEventListener('click', () => switchTab('suggested'));
+        document.getElementById('tab-requests').addEventListener('click', () => switchTab('requests'));
+        document.getElementById('tab-connected').addEventListener('click', () => switchTab('connected'));
+
+        function switchTab(tab) {
+            // Hide all tabs
+            document.getElementById('suggested-tab').classList.add('hidden');
+            document.getElementById('requests-tab').classList.add('hidden');
+            document.getElementById('connected-tab').classList.add('hidden');
+
+            // Show selected tab
+            document.getElementById(tab + '-tab').classList.remove('hidden');
+
+            // Update buttons
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+                btn.classList.remove('border-b-2', 'border-primary-500', 'text-white');
+                btn.classList.add('border-b', 'border-transparent', 'text-gray-400', 'hover:text-white');
+            });
+            document.getElementById('tab-' + tab).classList.add('border-b-2', 'border-primary-500', 'text-white');
+            document.getElementById('tab-' + tab).classList.remove('border-b', 'border-transparent', 'text-gray-400');
+        }
+
+        async function loadNetwork() {
+            try {
+                // Load all users
+                const usersRes = await fetch('/api/v1/users/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const usersData = await usersRes.json();
+                allUsers = Array.isArray(usersData) ? usersData : usersData.results || [];
+
+                // Load connections
+                const connRes = await fetch('/api/v1/collaborations/connections/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const connData = await connRes.json();
+                connectedUsers = Array.isArray(connData) ? connData : connData.results || [];
+
+                // Load pending requests
+                const reqRes = await fetch('/api/v1/collaborations/connections/requests/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const reqData = await reqRes.json();
+                connectionRequests = Array.isArray(reqData) ? reqData : reqData.results || [];
+
+                // Calculate suggested users (not self, not connected, no pending request)
+                const connectedIds = new Set();
+                const pendingIds = new Set();
+                const myId = currentUser.id;
+
+                connectedUsers.forEach(conn => {
+                    if (conn.requester.id === myId) connectedIds.add(conn.receiver.id);
+                    else connectedIds.add(conn.requester.id);
+                });
+
+                connectionRequests.forEach(req => pendingIds.add(req.requester.id));
+
+                suggestedUsers = allUsers.filter(user =>
+                    user.id !== myId &&
+                    !connectedIds.has(user.id) &&
+                    !pendingIds.has(user.id)
+                ).slice(0, 12);
+
+                // Update UI
+                renderSuggested();
+                renderRequests();
+                renderConnected();
+                updateCounts();
+            } catch (error) {
+                console.error('Error loading network:', error);
+            }
+        }
+
+        function renderSuggested() {
+            const container = document.getElementById('suggested-users');
+            const emptyMsg = document.getElementById('suggested-empty');
+
+            if (suggestedUsers.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = suggestedUsers.map(user => `
+                <div class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary-500/50 transition-all">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto mb-4">
+                            ${(user.first_name?.[0] || 'U').toUpperCase()}
+                        </div>
+                        <h3 class="text-white font-semibold mb-1">${user.first_name || user.username}</h3>
+                        <p class="text-gray-400 text-sm mb-4">${user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'User'}</p>
+                        <button onclick="sendConnection(${user.id})" class="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+                            Connect
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRequests() {
+            const container = document.getElementById('requests-list');
+            const emptyMsg = document.getElementById('requests-empty');
+
+            if (connectionRequests.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = connectionRequests.map(req => `
+                <div class="bg-white/5 rounded-xl p-4 border border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold">
+                            ${(req.requester.first_name?.[0] || 'U').toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 class="text-white font-semibold">${req.requester.first_name || req.requester.username}</h4>
+                            <p class="text-gray-400 text-sm">${req.requester.role?.charAt(0).toUpperCase() + req.requester.role?.slice(1) || 'User'}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="respondToConnection(${req.id}, 'accept')" class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors font-medium">
+                            Accept
+                        </button>
+                        <button onclick="respondToConnection(${req.id}, 'decline')" class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors font-medium">
+                            Decline
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderConnected() {
+            const container = document.getElementById('connected-list');
+            const emptyMsg = document.getElementById('connected-empty');
+
+            if (connectedUsers.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = connectedUsers.map(conn => {
+                const user = conn.requester.id === currentUser.id ? conn.receiver : conn.requester;
+                return `
+                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-primary-500/50 transition-all">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-lg mx-auto mb-4">
+                                ${(user.first_name?.[0] || 'U').toUpperCase()}
+                            </div>
+                            <h3 class="text-white font-semibold mb-1">${user.first_name || user.username}</h3>
+                            <p class="text-gray-400 text-sm mb-4">${user.role?.charAt(0).toUpperCase() + user.role?.slice(1) || 'User'}</p>
+                            <a href="/app/profile?user=${user.id}" class="w-full px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors font-medium inline-block">
+                                View Profile
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function sendConnection(userId) {
+            try {
+                const res = await fetch('/api/v1/collaborations/connections/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                    },
+                    body: JSON.stringify({ receiver_id: userId })
+                });
+
+                if (res.ok) {
+                    // Move user from suggested to pending
+                    suggestedUsers = suggestedUsers.filter(u => u.id !== userId);
+                    renderSuggested();
+                    alert('Connection request sent!');
+                } else {
+                    const error = await res.json();
+                    alert('Error: ' + (error.error || 'Failed to send connection'));
+                }
+            } catch (error) {
+                console.error('Error sending connection:', error);
+                alert('An error occurred');
+            }
+        }
+
+        async function respondToConnection(connId, action) {
+            try {
+                const res = await fetch(`/api/v1/collaborations/connections/${connId}/respond/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                    },
+                    body: JSON.stringify({ action: action })
+                });
+
+                if (res.ok) {
+                    loadNetwork(); // Reload network data
+                } else {
+                    alert('Failed to ' + action);
+                }
+            } catch (error) {
+                console.error('Error responding to connection:', error);
+                alert('An error occurred');
+            }
+        }
+
+        function updateCounts() {
+            document.getElementById('request-count').textContent = connectionRequests.length;
+            document.getElementById('connected-count').textContent = connectedUsers.length;
+        }
+
+        // Initialize
+        loadNetwork();
+        setInterval(loadNetwork, 30000); // Refresh every 30 seconds
+
+        async function handleLogout() {
+            await window.CollabHubAPI.api.logout();
+            window.location.href = '/app/login';
+        }
+    </script>

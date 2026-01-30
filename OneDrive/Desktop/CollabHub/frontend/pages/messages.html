@@ -14,7 +14,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
-                <a href="../index.html" class="flex items-center space-x-2">
+                <a href="/" class="flex items-center space-x-2">
                     <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
                         <span class="text-white font-bold text-xl">C</span>
                     </div>
@@ -23,49 +23,87 @@
 
                 <!-- Unauthenticated Navigation -->
                 <div id="unauthenticated-nav" class="hidden md:flex items-center space-x-8">
-                    <a href="../index.html#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
-                    <a href="opportunities.html" class="text-gray-300 hover:text-white transition-colors">Opportunities</a>
-                    <a href="../index.html#about" class="text-gray-300 hover:text-white transition-colors">About</a>
                 </div>
 
                 <!-- Authenticated Navigation -->
                 <div id="authenticated-nav" class="hidden md:flex items-center space-x-8">
-                    <a href="../index.html" class="text-gray-300 hover:text-white transition-colors">Home</a>
-                    <a href="startups.html" class="text-gray-300 hover:text-white transition-colors">Explore Startups</a>
-                    <a href="network.html" class="text-gray-300 hover:text-white transition-colors">Network</a>
+                    <a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a>
+                    <a href="/app/startups" class="text-gray-300 hover:text-white transition-colors">Explore Startups</a>
+                    <a href="/app/network" class="text-gray-300 hover:text-white transition-colors">Network</a>
                     <a href="#" id="dashboard-link" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
-                    <a href="messages.html" class="text-primary-400 hover:text-primary-300 transition-colors">Messages</a>
+                    <a href="/app/messages" class="text-primary-400 hover:text-primary-300 transition-colors">Messages</a>
                 </div>
 
                 <!-- Unauthenticated Actions -->
                 <div id="unauthenticated-actions" class="flex items-center space-x-4">
-                    <a href="login.html" class="text-gray-300 hover:text-white transition-colors">Sign In</a>
-                    <a href="register.html" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg font-medium hover:opacity-90">Get Started</a>
+                    <a href="/app/login" class="text-gray-300 hover:text-white transition-colors">Sign In</a>
+                    <a href="/app/register" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg font-medium hover:opacity-90">Get Started</a>
                 </div>
 
                 <!-- Authenticated Actions -->
                 <div id="authenticated-actions" class="hidden items-center space-x-4">
-                    <a href="profile.html" class="text-gray-300 hover:text-white transition-colors">Profile</a>
+                    <a href="/app/profile" class="text-gray-300 hover:text-white transition-colors">Profile</a>
                     <button id="logout-btn" class="text-red-400 hover:text-red-300 transition-colors">Logout</button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="pt-24 pb-12 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-white mb-4">Messages</h1>
-                <p class="text-gray-400 text-lg max-w-2xl mx-auto">Stay connected with your collaborators and potential partners.</p>
+    <main class="pt-24 pb-12 px-4 h-screen flex flex-col">
+        <div class="max-w-7xl mx-auto w-full flex-1 flex flex-col">
+            <div class="mb-4">
+                <h1 class="text-3xl font-bold text-white mb-2">Messages</h1>
+                <p class="text-gray-400">Chat with your connections</p>
             </div>
 
-            <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-12 border border-white/10 text-center">
-                <div class="text-6xl mb-6">💬</div>
-                <h2 class="text-2xl font-bold text-white mb-4">Coming Soon</h2>
-                <p class="text-gray-400 mb-6">We're building a powerful messaging system to help you communicate with your network.</p>
-                <a href="opportunities.html" class="inline-block px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg font-medium hover:opacity-90 transition-opacity">
-                    Explore Opportunities Instead
-                </a>
+            <!-- Messages Layout -->
+            <div class="flex-1 grid md:grid-cols-3 gap-6 min-h-0">
+                <!-- Conversations List -->
+                <div class="md:col-span-1 bg-white/5 rounded-2xl border border-white/10 overflow-hidden flex flex-col">
+                    <div class="p-4 border-b border-white/10">
+                        <input id="search-conversations" type="text" placeholder="Search conversations..." class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none text-sm">
+                    </div>
+                    <div id="conversations-list" class="flex-1 overflow-y-auto space-y-2 p-4">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div id="conversations-empty" class="flex-1 flex items-center justify-center text-gray-400 text-sm">
+                        No conversations yet
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="md:col-span-2 bg-white/5 rounded-2xl border border-white/10 overflow-hidden flex flex-col">
+                    <!-- Chat Header -->
+                    <div id="chat-header" class="hidden p-4 border-b border-white/10 flex items-center justify-between">
+                        <div>
+                            <h3 id="chat-title" class="text-white font-semibold"></h3>
+                            <p id="chat-subtitle" class="text-gray-400 text-sm"></p>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-chat" class="flex-1 flex items-center justify-center text-center">
+                        <div>
+                            <p class="text-6xl mb-4">💬</p>
+                            <p class="text-gray-400">Select a conversation to start messaging</p>
+                        </div>
+                    </div>
+
+                    <!-- Messages Display -->
+                    <div id="messages-container" class="hidden flex-1 overflow-y-auto p-4 space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Message Input -->
+                    <div id="chat-input" class="hidden p-4 border-t border-white/10">
+                        <form id="message-form" class="flex gap-2">
+                            <input id="message-text" type="text" placeholder="Type a message..." class="flex-1 px-4 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-primary-500 focus:outline-none" required>
+                            <button type="submit" class="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+                                Send
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -75,7 +113,422 @@
     <script>
         // Require authentication for this page
         if (!window.CollabHubAPI.isAuthenticated()) {
-            window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+            window.location.href = '/app/login?redirect=' + encodeURIComponent(window.location.href);
+        }
+
+        const currentUser = window.CollabHubAPI.getUserData();
+        let conversations = [];
+        let selectedConversation = null;
+        let messages = [];
+        let websocket = null;
+        let typingTimeout = null;
+
+        // Event listeners
+        document.getElementById('message-form').addEventListener('submit', sendMessage);
+        document.getElementById('search-conversations').addEventListener('input', debounce(filterConversations, 300));
+
+        function debounce(func, delay) {
+            let timeoutId;
+            return function() {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(func, delay);
+            };
+        }
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/v1/messages/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const data = await res.json();
+                conversations = Array.isArray(data) ? data : (data.results || []);
+                renderConversations();
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+            }
+        }
+
+        function renderConversations() {
+            const container = document.getElementById('conversations-list');
+            const emptyMsg = document.getElementById('conversations-empty');
+
+            if (conversations.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+
+            emptyMsg.classList.add('hidden');
+            container.innerHTML = conversations.map(conv => {
+                const otherUser = conv.participants.find(p => p.id !== currentUser.id);
+                const lastMessage = conv.messages && conv.messages[conv.messages.length - 1];
+                const isSelected = selectedConversation && selectedConversation.id === conv.id;
+
+                return `
+                    <div class="p-3 rounded-lg cursor-pointer transition-colors ${isSelected ? 'bg-primary-500/20 border border-primary-500' : 'hover:bg-white/5'}" onclick="selectConversation(${conv.id})">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                ${(otherUser.first_name?.[0] || 'U').toUpperCase()}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white font-semibold text-sm">${otherUser.first_name || otherUser.username}</h4>
+                                <p class="text-gray-400 text-xs truncate">${lastMessage ? lastMessage.content.substring(0, 30) : 'No messages'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Connect to WebSocket for real-time messaging
+         */
+        async function connectWebSocket(conversationId) {
+            // Close existing connection
+            if (websocket) {
+                websocket.close();
+            }
+
+            // Build WebSocket URL
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/messages/${conversationId}/`;
+
+            websocket = new WebSocket(wsUrl);
+
+            websocket.onopen = () => {
+                console.log('WebSocket connected');
+                // Send initial connection message
+                websocket.send(JSON.stringify({
+                    type: 'connection',
+                    message: 'Client connected'
+                }));
+            };
+
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+
+            websocket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                showToast('Connection error - messages may not be real-time', 'warning');
+            };
+
+            websocket.onclose = () => {
+                console.log('WebSocket disconnected');
+                // Attempt to reconnect after 3 seconds
+                setTimeout(() => {
+                    if (selectedConversation) {
+                        connectWebSocket(selectedConversation.id);
+                    }
+                }, 3000);
+            };
+        }
+
+        /**
+         * Handle incoming WebSocket messages
+         */
+        function handleWebSocketMessage(data) {
+            const type = data.type;
+            const msgData = data.data || {};
+
+            switch (type) {
+                case 'message':
+                    // New message received
+                    const newMsg = {
+                        id: msgData.id,
+                        sender: { id: msgData.sender_id, first_name: msgData.sender_name },
+                        content: msgData.content,
+                        created_at: msgData.timestamp,
+                        is_read: msgData.is_read
+                    };
+                    messages.push(newMsg);
+                    renderChat();
+
+                    // Auto-mark as read if we're the receiver
+                    if (msgData.sender_id !== currentUser.id) {
+                        markMessageRead(msgData.id);
+                    }
+                    break;
+
+                case 'typing':
+                    // Show typing indicator
+                    if (msgData.user_id !== currentUser.id) {
+                        showTypingIndicator(msgData.username, msgData.is_typing);
+                    }
+                    break;
+
+                case 'read_receipt':
+                    // Message was read
+                    const msg = messages.find(m => m.id === msgData.message_id);
+                    if (msg) {
+                        msg.is_read = true;
+                        renderChat();
+                    }
+                    break;
+
+                case 'user_online':
+                    updateChatStatus(`${msgData.username} is online`);
+                    break;
+
+                case 'user_offline':
+                    updateChatStatus(`User offline`);
+                    break;
+
+                case 'error':
+                    console.error('WebSocket error:', msgData.message);
+                    showToast(`Error: ${msgData.message}`, 'error');
+                    break;
+            }
+        }
+
+        /**
+         * Show typing indicator
+         */
+        function showTypingIndicator(username, isTyping) {
+            const messagesContainer = document.getElementById('messages-container');
+            const typingId = 'typing-indicator';
+
+            if (isTyping) {
+                // Remove existing typing indicator
+                const existing = document.getElementById(typingId);
+                if (existing) existing.remove();
+
+                // Add new typing indicator
+                const typingDiv = document.createElement('div');
+                typingDiv.id = typingId;
+                typingDiv.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="text-gray-400 text-sm italic">
+                            <span>${username}</span> is typing<span class="animate-pulse">...</span>
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(typingDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+                const existing = document.getElementById(typingId);
+                if (existing) existing.remove();
+            }
+        }
+
+        /**
+         * Update chat status in header
+         */
+        function updateChatStatus(status) {
+            const subtitle = document.getElementById('chat-subtitle');
+            if (subtitle) {
+                subtitle.textContent = status;
+            }
+        }
+
+        /**
+         * Send typing indicator (debounced)
+         */
+        function sendTypingIndicator() {
+            if (!websocket || websocket.readyState !== WebSocket.OPEN) return;
+
+            websocket.send(JSON.stringify({
+                type: 'typing',
+                is_typing: true
+            }));
+
+            // Stop typing after 3 seconds of inactivity
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                if (websocket && websocket.readyState === WebSocket.OPEN) {
+                    websocket.send(JSON.stringify({
+                        type: 'typing',
+                        is_typing: false
+                    }));
+                }
+            }, 3000);
+        }
+
+        /**
+         * Mark message as read
+         */
+        function markMessageRead(messageId) {
+            if (!websocket || websocket.readyState !== WebSocket.OPEN) return;
+
+            websocket.send(JSON.stringify({
+                type: 'read_receipt',
+                message_id: messageId
+            }));
+        }
+
+        async function selectConversation(convId) {
+            try {
+                const res = await fetch(`/api/v1/messages/${convId}/`, {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                selectedConversation = await res.json();
+
+                // Load messages for this conversation
+                const msgRes = await fetch(`/api/v1/messages/${convId}/messages/`, {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                messages = await msgRes.json();
+                messages = Array.isArray(messages) ? messages : (messages.results || []);
+
+                renderChat();
+                renderConversations(); // Re-render to show selection
+
+                // Connect to WebSocket for real-time updates
+                connectWebSocket(convId);
+
+                // Mark messages as read via REST API (for those already read)
+                fetch(`/api/v1/messages/${convId}/read/`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                }).catch(e => console.error('Error marking read:', e));
+
+            } catch (error) {
+                console.error('Error selecting conversation:', error);
+                showToast('Error loading conversation', 'error');
+            }
+        }
+
+        function renderChat() {
+            const header = document.getElementById('chat-header');
+            const empty = document.getElementById('empty-chat');
+            const messagesContainer = document.getElementById('messages-container');
+            const inputArea = document.getElementById('chat-input');
+
+            if (!selectedConversation) {
+                header.classList.add('hidden');
+                empty.classList.remove('hidden');
+                messagesContainer.classList.add('hidden');
+                inputArea.classList.add('hidden');
+                return;
+            }
+
+            header.classList.remove('hidden');
+            empty.classList.add('hidden');
+            messagesContainer.classList.remove('hidden');
+            inputArea.classList.remove('hidden');
+
+            // Update header
+            const otherUser = selectedConversation.participants.find(p => p.id !== currentUser.id);
+            document.getElementById('chat-title').textContent = otherUser.first_name || otherUser.username;
+            document.getElementById('chat-subtitle').textContent = otherUser.role;
+
+            // Render messages
+            messagesContainer.innerHTML = messages.map(msg => {
+                const isSent = msg.sender.id === currentUser.id;
+                const readStatus = isSent && msg.is_read ? ' ✓✓' : '';
+                return `
+                    <div class="${isSent ? 'flex justify-end' : 'flex justify-start'}">
+                        <div class="${`max-w-xs px-4 py-2 rounded-lg ${isSent ? 'bg-primary-500 text-white' : 'bg-white/10 text-gray-200'}`}">
+                            <p class="text-sm">${escapeHtml(msg.content)}</p>
+                            <p class="${`text-xs mt-1 ${isSent ? 'text-primary-100' : 'text-gray-400'}`}>${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}${readStatus}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            if (!selectedConversation || !websocket) return;
+
+            const content = document.getElementById('message-text').value.trim();
+            if (!content) return;
+
+            // Clear input
+            document.getElementById('message-text').value = '';
+
+            // Send via WebSocket
+            if (websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    type: 'message',
+                    content: content
+                }));
+            } else {
+                // Fallback to REST API if WebSocket is not available
+                try {
+                    const res = await fetch(`/api/v1/messages/${selectedConversation.id}/messages/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                        },
+                        body: JSON.stringify({ content: content })
+                    });
+
+                    if (res.ok) {
+                        selectConversation(selectedConversation.id);
+                    } else {
+                        showToast('Error sending message', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    showToast('Error sending message', 'error');
+                }
+            }
+        }
+
+        function filterConversations() {
+            const search = document.getElementById('search-conversations').value.toLowerCase();
+            const filtered = conversations.filter(conv => {
+                const otherUser = conv.participants.find(p => p.id !== currentUser.id);
+                return (otherUser.first_name || otherUser.username).toLowerCase().includes(search);
+            });
+
+            const container = document.getElementById('conversations-list');
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm p-4">No conversations found</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(conv => {
+                const otherUser = conv.participants.find(p => p.id !== currentUser.id);
+                const lastMessage = conv.messages && conv.messages[conv.messages.length - 1];
+                const isSelected = selectedConversation && selectedConversation.id === conv.id;
+
+                return `
+                    <div class="p-3 rounded-lg cursor-pointer transition-colors ${isSelected ? 'bg-primary-500/20 border border-primary-500' : 'hover:bg-white/5'}" onclick="selectConversation(${conv.id})">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                ${(otherUser.first_name?.[0] || 'U').toUpperCase()}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white font-semibold text-sm">${otherUser.first_name || otherUser.username}</h4>
+                                <p class="text-gray-400 text-xs truncate">${lastMessage ? lastMessage.content.substring(0, 30) : 'No messages'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Add typing indicator when user starts typing
+        document.getElementById('message-text').addEventListener('input', () => {
+            sendTypingIndicator();
+        });
+
+        // Initialize
+        loadConversations();
+        setInterval(loadConversations, 30000); // Refresh every 30 seconds
+
+        async function handleLogout() {
+            if (websocket) websocket.close();
+            await window.CollabHubAPI.api.logout();
+            window.location.href = '/app/login';
         }
     </script>
 </body>

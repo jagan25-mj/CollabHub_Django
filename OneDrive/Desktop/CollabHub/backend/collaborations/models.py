@@ -58,6 +58,11 @@ class Application(models.Model):
     class Meta:
         db_table = 'applications'
         unique_together = ['opportunity', 'applicant']
+        indexes = [
+            models.Index(fields=['applicant', '-applied_at']),
+            models.Index(fields=['opportunity', 'status']),
+            models.Index(fields=['status', '-applied_at']),
+        ]
         ordering = ['-applied_at']
     
     def __str__(self):
@@ -198,6 +203,10 @@ class Notification(models.Model):
     
     class Meta:
         db_table = 'notifications'
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'is_read']),
+        ]
         ordering = ['-created_at']
     
     def __str__(self):

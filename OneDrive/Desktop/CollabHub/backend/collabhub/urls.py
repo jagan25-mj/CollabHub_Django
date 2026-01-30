@@ -23,8 +23,8 @@ def serve_frontend(request, page='index.html'):
     # Handle pages directory
     if page.startswith('pages/'):
         file_path = frontend_dir / page
-    elif page in ['login', 'register', 'opportunities', 'profile', 
-                  'dashboard-talent', 'dashboard-founder', 'dashboard-investor']:
+    elif page in ['login', 'register', 'opportunities', 'profile', 'messages', 'startups', 'network',
+                  'dashboard-talent', 'dashboard-founder', 'dashboard-investor', 'startup-detail']:
         file_path = frontend_dir / 'pages' / f'{page}.html'
     else:
         file_path = frontend_dir / page

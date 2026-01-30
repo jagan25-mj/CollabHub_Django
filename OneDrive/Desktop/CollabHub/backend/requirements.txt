@@ -18,3 +18,8 @@ Pillow>=10.0.0
 
 # Django Filters for API filtering
 django-filter>=23.5
+
+# Real-time WebSockets (Phase 4)
+channels>=4.0.0
+channels-redis>=4.1.0
+daphne>=4.0.0

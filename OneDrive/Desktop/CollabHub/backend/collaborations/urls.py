@@ -6,13 +6,16 @@ from django.urls import path
 from .views import (
     ApplicationListCreateView,
     ApplicationDetailView,
+    ApplicationStatusUpdateView,
     OpportunityApplicationsView,
+    StartupApplicationsView,
     TeamInvitationListCreateView,
     TeamInvitationResponseView,
     ConnectionListCreateView,
     ConnectionRequestsView,
     ConnectionResponseView,
     NotificationListView,
+    NotificationDetailView,
     NotificationMarkReadView,
     UnreadNotificationCountView
 )
@@ -21,7 +24,9 @@ urlpatterns = [
     # Applications
     path('applications/', ApplicationListCreateView.as_view(), name='application_list'),
     path('applications/<int:pk>/', ApplicationDetailView.as_view(), name='application_detail'),
+    path('applications/<int:pk>/status/', ApplicationStatusUpdateView.as_view(), name='application_status'),
     path('opportunities/<int:opportunity_id>/applications/', OpportunityApplicationsView.as_view(), name='opportunity_applications'),
+    path('startups/<int:startup_id>/applications/', StartupApplicationsView.as_view(), name='startup_applications'),
     
     # Team Invitations
     path('invitations/', TeamInvitationListCreateView.as_view(), name='invitation_list'),
@@ -34,6 +39,7 @@ urlpatterns = [
     
     # Notifications
     path('notifications/', NotificationListView.as_view(), name='notification_list'),
+    path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification_detail'),
     path('notifications/read/', NotificationMarkReadView.as_view(), name='notification_read'),
     path('notifications/count/', UnreadNotificationCountView.as_view(), name='notification_count'),
 ]

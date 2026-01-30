@@ -38,6 +38,9 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 # =============================================================================
 
 INSTALLED_APPS = [
+    # ASGI Server (must be first)
+    'daphne',
+    
     # Django Core
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',  # Token blacklisting for logout
     'corsheaders',                       # CORS support
     'django_filters',                    # Filtering for API
+    'channels',                          # WebSockets (Phase 4)
     
     # CollabHub Apps (modular architecture)
     'users.apps.UsersConfig',            # User management & profiles
@@ -252,3 +256,24 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+
+# =============================================================================
+# CHANNELS CONFIGURATION (WebSockets for Real-Time Features)
+# =============================================================================
+
+ASGI_APPLICATION = 'collabhub.asgi.application'
+
+# Channel layer configuration
+CHANNEL_LAYERS = {
+    'default': {
+        # For development: Use in-memory channel layer (single process)
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+        
+        # For production: Use Redis channel layer
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     'hosts': [('redis', 6379)],
+        # },
+    }
+}

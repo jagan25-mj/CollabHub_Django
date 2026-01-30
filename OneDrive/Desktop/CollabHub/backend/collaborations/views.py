@@ -96,6 +96,93 @@ class OpportunityApplicationsView(generics.ListAPIView):
         ).select_related('applicant')
 
 
+class StartupApplicationsView(generics.ListAPIView):
+    """List all applications for a startup's opportunities (founder only)."""
+    
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        startup_id = self.kwargs['startup_id']
+        # Get all applications for this startup's opportunities where user is founder
+        return Application.objects.filter(
+            opportunity__startup_id=startup_id,
+            opportunity__startup__founder=self.request.user
+        ).select_related('applicant', 'opportunity')
+
+
+class ApplicationStatusUpdateView(APIView):
+    """
+    Update application status (for founders).
+    
+    Actions: accept, reject, shortlist
+    """
+    
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        action = request.data.get('action')  # 'accept', 'reject', 'shortlist'
+        feedback = request.data.get('feedback', '')
+        
+        try:
+            application = Application.objects.get(pk=pk)
+        except Application.DoesNotExist:
+            return Response(
+                {'error': 'Application not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Verify user is opportunity owner
+        if application.opportunity.created_by != request.user:
+            return Response(
+                {'error': 'Not authorized to update this application'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Validate action
+        valid_actions = {
+            'accept': Application.Status.ACCEPTED,
+            'reject': Application.Status.REJECTED,
+            'shortlist': Application.Status.SHORTLISTED
+        }
+        
+        if action not in valid_actions:
+            return Response(
+                {'error': f'Invalid action. Must be one of: {", ".join(valid_actions.keys())}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update application
+        application.status = valid_actions[action]
+        if feedback:
+            application.feedback = feedback
+        application.save()
+        
+        # Create notification for applicant
+        status_messages = {
+            'accept': 'Your application has been accepted!',
+            'reject': 'Your application has been rejected.',
+            'shortlist': 'Your application has been shortlisted!'
+        }
+        
+        Notification.objects.create(
+            user=application.applicant,
+            type=Notification.Type.APPLICATION,
+            title=f'Application {action.title()}ed',
+            message=status_messages.get(action),
+            link=f'/applications/{application.id}',
+            related_user=request.user
+        )
+        
+        return Response(
+            {
+                'message': f'Application {action}ed successfully',
+                'application': ApplicationSerializer(application).data
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 # =============================================================================
 # TEAM INVITATION VIEWS
 # =============================================================================
@@ -315,6 +402,20 @@ class NotificationListView(generics.ListAPIView):
         return Notification.objects.filter(
             user=self.request.user
         ).order_by('-created_at')[:50]
+
+
+class NotificationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET: Get notification details
+    PATCH: Update notification (mark as read)
+    DELETE: Delete notification
+    """
+    
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)
 
 
 class NotificationMarkReadView(APIView):

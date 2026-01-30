@@ -29,7 +29,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
-                <a href="../index.html" class="flex items-center space-x-2">
+                <a href="/" class="flex items-center space-x-2">
                     <div class="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
                         <span class="text-white font-bold text-xl">C</span>
                     </div>
@@ -38,15 +38,15 @@
 
                 <!-- Authenticated Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="../index.html" class="text-gray-400 hover:text-white transition-colors">Home</a>
-                    <a href="startups.html" class="text-gray-400 hover:text-white transition-colors">Explore Startups</a>
-                    <a href="network.html" class="text-gray-400 hover:text-white transition-colors">Network</a>
+                    <a href="/" class="text-gray-400 hover:text-white transition-colors">Home</a>
+                    <a href="/app/startups" class="text-gray-400 hover:text-white transition-colors">Explore Startups</a>
+                    <a href="/app/network" class="text-gray-400 hover:text-white transition-colors">Network</a>
                     <a href="#" class="text-primary-400 hover:text-primary-300 transition-colors">Dashboard</a>
-                    <a href="messages.html" class="text-gray-400 hover:text-white transition-colors">Messages</a>
+                    <a href="/app/messages" class="text-gray-400 hover:text-white transition-colors">Messages</a>
+                    <a href="/app/profile" class="text-gray-400 hover:text-white transition-colors">Profile</a>
                 </div>
 
                 <div class="flex items-center space-x-6">
-                    <a href="opportunities.html" class="text-gray-400 hover:text-white transition-colors">Opportunities</a>
                     <a href="#" class="text-gray-400 hover:text-white transition-colors relative">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -67,7 +67,7 @@
                         </button>
                         <div
                             class="absolute right-0 mt-2 w-48 bg-slate-800 rounded-xl border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                            <a href="profile.html"
+                            <a href="/app/profile"
                                 class="block px-4 py-3 text-gray-300 hover:bg-white/5 rounded-t-xl">Profile</a>
                             <a href="#" class="block px-4 py-3 text-gray-300 hover:bg-white/5">Settings</a>
                             <button onclick="handleLogout()"
@@ -149,7 +149,6 @@
                     <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden mb-8">
                         <div class="p-6 border-b border-white/10 flex justify-between items-center">
                             <h2 class="text-xl font-semibold text-white">Your Interests</h2>
-                            <a href="opportunities.html" class="text-primary-400 text-sm hover:text-primary-300">Find More →</a>
                         </div>
                         <div id="interests-list" class="divide-y divide-white/5">
                             <!-- Loading -->
@@ -164,7 +163,7 @@
                     <div class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
                         <div class="p-6 border-b border-white/10 flex justify-between items-center">
                             <h2 class="text-xl font-semibold text-white">My Teams</h2>
-                            <a href="startups.html" class="text-primary-400 text-sm hover:text-primary-300">Explore Startups →</a>
+                            <a href="/app/startups" class="text-primary-400 text-sm hover:text-primary-300">Explore Startups →</a>
                         </div>
                         <div id="teams-list" class="divide-y divide-white/5">
                             <!-- Loading -->
@@ -182,19 +181,7 @@
                     <div class="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
                         <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
                         <div class="space-y-3">
-                            <a href="opportunities.html"
-                                class="flex items-center p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
-                                <div
-                                    class="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center mr-3">
-                                    <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
-                                <span class="text-gray-300">Browse Opportunities</span>
-                            </a>
-                            <a href="profile.html"
+                            <a href="/app/profile"
                                 class="flex items-center p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
                                 <div
                                     class="w-10 h-10 bg-secondary-500/20 rounded-lg flex items-center justify-center mr-3">
@@ -207,7 +194,7 @@
                                 </div>
                                 <span class="text-gray-300">Update Profile</span>
                             </a>
-                            <a href="messages.html"
+                            <a href="/app/messages"
                                 class="flex items-center p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
                                 <div
                                     class="w-10 h-10 bg-accent-500/20 rounded-lg flex items-center justify-center mr-3">
@@ -242,22 +229,54 @@
     <script src="../js/api.js"></script>
     <script src="../js/app.js"></script>
     <script>
-        // Check authentication
+        // Check authentication and role
         if (!window.CollabHubAPI.isAuthenticated()) {
-            window.location.href = 'login.html';
+            window.location.href = '/app/login';
         }
 
         // Load user data
         const user = window.CollabHubAPI.getUserData();
+        if (user && user.role !== 'talent') {
+            window.location.href = `/app/dashboard-${user.role}`;
+        }
         if (user) {
             document.getElementById('user-name').textContent = user.first_name || user.username;
             document.getElementById('user-avatar').textContent = (user.first_name?.[0] || user.username?.[0] || 'U').toUpperCase();
         }
 
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                // Load connections
+                const connRes = await fetch('/api/v1/collaborations/connections/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const connections = await connRes.json();
+                const connCount = (Array.isArray(connections) ? connections : connections.results || []).length;
+
+                // Load applications
+                const appRes = await fetch('/api/v1/collaborations/applications/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const applications = await appRes.json();
+                const appCount = (Array.isArray(applications) ? applications : applications.results || []).length;
+
+                // Update UI
+                const statBoxes = document.querySelectorAll('.grid.md\\:grid-cols-4 .text-3xl');
+                if (statBoxes[0]) statBoxes[0].textContent = appCount; // Applications Sent
+                if (statBoxes[1]) statBoxes[1].textContent = connCount; // Connections
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        loadDashboardStats();
+        setInterval(loadDashboardStats, 30000);
+
         // Handle logout
         async function handleLogout() {
             await window.CollabHubAPI.api.logout();
-            window.location.href = 'login.html';
+            window.location.href = '/app/login';
         }
 
         // Load dashboard stats
@@ -297,7 +316,6 @@
                             <div class="text-5xl mb-4">💡</div>
                             <h3 class="text-white font-medium mb-2">No interests yet</h3>
                             <p class="text-gray-400 text-sm mb-4">Start exploring opportunities to show your interests!</p>
-                            <a href="opportunities.html" class="inline-block px-4 py-2 bg-primary-500 text-white rounded-lg text-sm">Browse Opportunities</a>
                         </div>
                     `;
                     return;
@@ -356,7 +374,7 @@
                             <div class="text-5xl mb-4">👥</div>
                             <h3 class="text-white font-medium mb-2">No teams yet</h3>
                             <p class="text-gray-400 text-sm mb-4">Join a startup team or create your own!</p>
-                            <a href="startups.html" class="inline-block px-4 py-2 bg-primary-500 text-white rounded-lg text-sm">Explore Startups</a>
+                            <a href="/app/startups" class="inline-block px-4 py-2 bg-primary-500 text-white rounded-lg text-sm">Explore Startups</a>
                         </div>
                     `;
                     return;

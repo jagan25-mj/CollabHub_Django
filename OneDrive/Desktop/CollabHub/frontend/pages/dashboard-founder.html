@@ -13,7 +13,7 @@
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans">
     <nav class="fixed w-full z-50 bg-slate-900/95 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
-            <a href="../index.html" class="flex items-center space-x-2">
+            <a href="/" class="flex items-center space-x-2">
                 <div
                     class="w-10 h-10 bg-gradient-to-r from-sky-500 to-fuchsia-500 rounded-xl flex items-center justify-center">
                     <span class="text-white font-bold">C</span>
@@ -21,7 +21,7 @@
                 <span class="text-white font-bold text-xl">CollabHub</span>
             </a>
             <div class="flex items-center space-x-4">
-                <a href="opportunities.html" class="text-gray-400 hover:text-white">Opportunities</a>
+                <a href="/app/profile" class="text-gray-400 hover:text-white">Profile</a>
                 <button onclick="handleLogout()" class="text-red-400 hover:text-red-300">Logout</button>
             </div>
         </div>
@@ -63,35 +63,30 @@
             <div class="grid lg:grid-cols-2 gap-8">
                 <div class="bg-white/5 rounded-2xl border border-white/10 p-6">
                     <h2 class="text-xl font-semibold text-white mb-4">My Startups</h2>
-                    <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                        <div class="flex items-center justify-between mb-3">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-r from-sky-500 to-fuchsia-500 rounded-xl flex items-center justify-center text-white font-bold">
-                                TC</div>
-                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">Active</span>
+                    <div id="startups-list" class="space-y-3">
+                        <div class="animate-pulse bg-white/5 rounded-xl p-5 border border-white/10">
+                            <div class="h-6 bg-white/10 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-white/10 rounded w-1/2"></div>
                         </div>
-                        <h3 class="text-white font-semibold">TechConnect</h3>
-                        <p class="text-gray-400 text-sm">AI-powered networking platform</p>
                     </div>
                 </div>
 
                 <div class="bg-white/5 rounded-2xl border border-white/10 p-6">
-                    <h2 class="text-xl font-semibold text-white mb-4">Recent Applications</h2>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                            <div class="flex items-center">
-                                <div
-                                    class="w-10 h-10 bg-fuchsia-500/20 rounded-full flex items-center justify-center text-fuchsia-400 font-medium mr-3">
-                                    JD</div>
-                                <div>
-                                    <div class="text-white font-medium">John Doe</div>
-                                    <div class="text-gray-500 text-sm">Frontend Developer</div>
+                    <h2 class="text-xl font-semibold text-white mb-4">Applications to Review</h2>
+                    <div id="applications-list" class="space-y-3">
+                        <div class="animate-pulse">
+                            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                <div class="flex items-center flex-1">
+                                    <div class="w-10 h-10 bg-white/10 rounded-full mr-3"></div>
+                                    <div class="flex-1">
+                                        <div class="h-4 bg-white/10 rounded w-1/3 mb-2"></div>
+                                        <div class="h-3 bg-white/10 rounded w-1/4"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button
-                                    class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-sm">Accept</button>
-                                <button class="px-3 py-1 bg-red-500/20 text-red-400 rounded text-sm">Reject</button>
+                                <div class="flex space-x-2">
+                                    <div class="w-20 h-8 bg-white/10 rounded"></div>
+                                    <div class="w-20 h-8 bg-white/10 rounded"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -100,11 +95,263 @@
         </div>
     </main>
 
+    <!-- Create Startup Modal -->
+    <div id="createStartupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 rounded-2xl border border-white/10 w-full max-w-md">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white">Create Startup</h2>
+                <button onclick="closeStartupModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <form id="createStartupForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Startup Name</label>
+                    <input id="startupName" type="text" placeholder="e.g., TechFlow" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-sky-500 focus:outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Description</label>
+                    <textarea id="startupDesc" placeholder="What does your startup do?" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-sky-500 focus:outline-none" rows="3" required></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Industry</label>
+                    <select id="startupIndustry" class="w-full px-3 py-2 bg-white/10 text-white rounded-lg border border-white/20 focus:border-sky-500 focus:outline-none" required>
+                        <option value="" disabled selected>Select Industry</option>
+                        <option value="AI/ML">AI/ML</option>
+                        <option value="FinTech">FinTech</option>
+                        <option value="SaaS">SaaS</option>
+                        <option value="Web3">Web3</option>
+                        <option value="HealthTech">HealthTech</option>
+                        <option value="EdTech">EdTech</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-sky-500 to-fuchsia-500 text-white rounded-lg font-medium hover:opacity-90">Create Startup</button>
+                    <button type="button" onclick="closeStartupModal()" class="flex-1 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="../js/api.js"></script>
     <script>
-        if (!window.CollabHubAPI.isAuthenticated()) window.location.href = 'login.html';
-        function showModal() { alert('Create Startup modal'); }
-        async function handleLogout() { await window.CollabHubAPI.api.logout(); window.location.href = 'login.html'; }
+        if (!window.CollabHubAPI.isAuthenticated()) window.location.href = '/app/login';
+        const user = window.CollabHubAPI.getUserData();
+        if (user?.role !== 'founder') window.location.href = `/app/dashboard-${user?.role || 'talent'}`;
+
+        let founderStartups = [];
+        let allApplications = [];
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load my startups
+                const startupRes = await fetch('/api/v1/startups/my/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const startupData = await startupRes.json();
+                founderStartups = Array.isArray(startupData) ? startupData : (startupData.results || []);
+
+                // Load all applications for founder's startups
+                allApplications = [];
+                for (const startup of founderStartups) {
+                    try {
+                        const appRes = await fetch(`/api/v1/collaborations/startups/${startup.id}/applications/`, {
+                            headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                        });
+                        if (appRes.ok) {
+                            const appData = await appRes.json();
+                            const apps = Array.isArray(appData) ? appData : (appData.results || []);
+                            allApplications.push(...apps.map(app => ({ ...app, startup })));
+                        }
+                    } catch (e) {
+                        console.log('Could not load applications for startup', startup.id);
+                    }
+                }
+
+                updateStats();
+                renderStartups();
+                renderApplications();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateStats() {
+            // Update My Startups stat
+            const statBoxes = document.querySelectorAll('.grid.md\\:grid-cols-4 > div');
+            if (statBoxes[0]) {
+                statBoxes[0].querySelector('.text-3xl').textContent = founderStartups.length;
+            }
+
+            // Update Applications count
+            const pendingApps = allApplications.filter(a => a.status === 'pending').length;
+            if (statBoxes[2]) {
+                statBoxes[2].querySelector('.text-3xl').textContent = pendingApps;
+            }
+
+            // Update Team Members count (sum of all team members across startups)
+            let totalTeamMembers = 0;
+            founderStartups.forEach(startup => {
+                totalTeamMembers += startup.team_size || 1;
+            });
+            if (statBoxes[3]) {
+                statBoxes[3].querySelector('.text-3xl').textContent = totalTeamMembers;
+            }
+        }
+
+        function renderStartups() {
+            const container = document.getElementById('startups-list');
+            if (!container || !founderStartups.length) {
+                container.innerHTML = '<p class="text-gray-400">No startups yet. Create your first startup!</p>';
+                return;
+            }
+
+            const html = founderStartups.map(startup => `
+                <div class="bg-white/5 rounded-xl p-5 border border-white/10 hover:border-white/30 transition-colors cursor-pointer"
+                     onclick="window.location.href='/app/startup-detail?id=${startup.id}'">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-sky-500 to-fuchsia-500 rounded-xl flex items-center justify-center text-white font-bold">
+                            ${(startup.name?.[0] || 'S').toUpperCase()}
+                        </div>
+                        <span class="px-2 py-1 ${startup.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'} rounded text-xs">${startup.status?.charAt(0).toUpperCase() + startup.status?.slice(1) || 'Active'}</span>
+                    </div>
+                    <h3 class="text-white font-semibold">${startup.name}</h3>
+                    <p class="text-gray-400 text-sm">${(startup.description || 'No description').substring(0, 60)}...</p>
+                    <p class="text-gray-500 text-xs mt-2">Stage: ${(startup.stage || 'idea').charAt(0).toUpperCase() + (startup.stage || 'idea').slice(1)}</p>
+                </div>
+            `).join('');
+
+            container.innerHTML = html || '<p class="text-gray-400">No startups yet.</p>';
+        }
+
+        function renderApplications() {
+            const container = document.getElementById('applications-list');
+            const pendingApps = allApplications.filter(a => a.status === 'pending').slice(0, 5);
+            
+            if (!container || !pendingApps.length) {
+                container.innerHTML = '<p class="text-gray-400 text-sm">No pending applications.</p>';
+                return;
+            }
+
+            const html = pendingApps.map(app => {
+                const applicant = app.applicant || {};
+                const initials = ((applicant.first_name?.[0] || '') + (applicant.last_name?.[0] || '') || 'U').toUpperCase();
+                const statusColor = app.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-500/20 text-gray-400';
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10 hover:border-white/30 transition-colors">
+                        <div class="flex items-center flex-1 min-w-0 cursor-pointer" onclick="viewApplicationDetails('${app.id}')">
+                            <div class="w-10 h-10 bg-gradient-to-r from-sky-500 to-fuchsia-500 rounded-full flex items-center justify-center text-white font-medium mr-3 flex-shrink-0">
+                                ${initials}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-white font-medium truncate">${applicant.first_name || applicant.username || 'Unknown'}</div>
+                                <div class="text-gray-500 text-sm truncate">${app.startup?.name || 'Unknown Opportunity'}</div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2 ml-3 flex-shrink-0">
+                            <button onclick="updateApplicationStatus('${app.id}', 'accepted')"
+                                class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-sm hover:bg-emerald-500/30 transition-colors">✓</button>
+                            <button onclick="updateApplicationStatus('${app.id}', 'rejected')"
+                                class="px-3 py-1 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30 transition-colors">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        async function updateApplicationStatus(appId, action) {
+            const token = window.CollabHubAPI.getAccessToken();
+            try {
+                const response = await fetch(`/api/v1/collaborations/applications/${appId}/status/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action })
+                });
+
+                if (response.ok) {
+                    showToast(`Application ${action}`, 'success');
+                    loadDashboardData(); // Refresh the list
+                } else {
+                    showToast(`Failed to ${action} application`, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating application:', error);
+                showToast('Error updating application', 'error');
+            }
+        }
+
+        function viewApplicationDetails(appId) {
+            // Could navigate to detailed view in future
+            showToast('View application details (feature coming soon)', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            // Simple toast notification
+            const bg = type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 
+                       type === 'error' ? 'bg-red-500/20 text-red-400' : 
+                       'bg-blue-500/20 text-blue-400';
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 ${bg} rounded-lg text-sm z-50`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showModal() {
+            document.getElementById('createStartupModal').classList.remove('hidden');
+        }
+
+        function closeStartupModal() {
+            document.getElementById('createStartupModal').classList.add('hidden');
+        }
+
+        document.getElementById('createStartupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const formData = {
+                    name: document.getElementById('startupName').value,
+                    description: document.getElementById('startupDesc').value,
+                    industry: document.getElementById('startupIndustry').value
+                };
+
+                const response = await fetch('/api/v1/startups/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    closeStartupModal();
+                    showToast('Startup created successfully!', 'success');
+                    document.getElementById('createStartupForm').reset();
+                    loadDashboardData();
+                } else {
+                    const error = await response.json();
+                    showToast('Error creating startup: ' + (error.detail || 'Please try again'), 'error');
+                }
+            } catch (error) {
+                console.error('Error creating startup:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Initialize dashboard
+        loadDashboardData();
+        setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+
+        async function handleLogout() { 
+            await window.CollabHubAPI.api.logout();
+            window.location.href = '/app/login';
+        }
     </script>
 </body>
 

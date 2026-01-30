@@ -3,7 +3,7 @@
  * Handles all backend API calls with JWT authentication
  */
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = '/api/v1';
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'collabhub_access_token';
@@ -130,7 +130,7 @@ async function apiRequest(endpoint, options = {}) {
             response = await makeRequest(accessToken);
         } catch (e) {
             // Redirect to login
-            window.location.href = '/frontend/pages/login.html';
+            window.location.href = '/app/login';
             throw e;
         }
     }

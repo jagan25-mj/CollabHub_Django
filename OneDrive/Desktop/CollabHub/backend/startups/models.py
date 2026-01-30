@@ -130,3 +130,57 @@ class StartupUpdate(models.Model):
     
     def __str__(self):
         return f"{self.startup.name}: {self.title}"
+
+
+class SavedStartup(models.Model):
+    """Startups saved/bookmarked by users for later reference."""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='saved_startups'
+    )
+    startup = models.ForeignKey(
+        Startup,
+        on_delete=models.CASCADE,
+        related_name='saved_by'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'saved_startups'
+        unique_together = ['user', 'startup']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['startup']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} saved {self.startup.name}"
+
+
+class FollowedStartup(models.Model):
+    """Startups followed by users for notifications and updates."""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='following_startups'
+    )
+    startup = models.ForeignKey(
+        Startup,
+        on_delete=models.CASCADE,
+        related_name='followers'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'followed_startups'
+        unique_together = ['user', 'startup']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['startup']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} follows {self.startup.name}"

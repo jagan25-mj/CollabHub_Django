@@ -13,7 +13,7 @@
 <body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen font-sans">
     <nav class="fixed w-full z-50 bg-slate-900/95 backdrop-blur-xl border-b border-white/10">
         <div class="max-w-7xl mx-auto px-4 flex justify-between h-16 items-center">
-            <a href="../index.html" class="flex items-center space-x-2">
+            <a href="/" class="flex items-center space-x-2">
                 <div
                     class="w-10 h-10 bg-gradient-to-r from-sky-500 to-fuchsia-500 rounded-xl flex items-center justify-center">
                     <span class="text-white font-bold">C</span>
@@ -21,7 +21,7 @@
                 <span class="text-white font-bold text-xl">CollabHub</span>
             </a>
             <div class="flex items-center space-x-4">
-                <a href="opportunities.html" class="text-gray-400 hover:text-white">Startups</a>
+                <a href="/app/profile" class="text-gray-400 hover:text-white">Profile</a>
                 <button onclick="handleLogout()" class="text-red-400 hover:text-red-300">Logout</button>
             </div>
         </div>
@@ -163,8 +163,40 @@
 
     <script src="../js/api.js"></script>
     <script>
-        if (!window.CollabHubAPI.isAuthenticated()) window.location.href = 'login.html';
-        async function handleLogout() { await window.CollabHubAPI.api.logout(); window.location.href = 'login.html'; }
+        if (!window.CollabHubAPI.isAuthenticated()) window.location.href = '/app/login';
+        const user = window.CollabHubAPI.getUserData();
+        if (user?.role !== 'investor') window.location.href = `/app/dashboard-${user?.role || 'talent'}`;
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                // Load startups
+                const startupRes = await fetch('/api/v1/startups/?limit=1000', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const startups = await startupRes.json();
+                const startupCount = (Array.isArray(startups) ? startups : startups.results || []).length;
+
+                // Load connections
+                const connRes = await fetch('/api/v1/collaborations/connections/', {
+                    headers: { 'Authorization': `Bearer ${window.CollabHubAPI.getAccessToken()}` }
+                });
+                const connections = await connRes.json();
+                const connCount = (Array.isArray(connections) ? connections : connections.results || []).length;
+
+                // Update UI
+                const statBoxes = document.querySelectorAll('.grid.md\\:grid-cols-4 .text-3xl');
+                if (statBoxes[0]) statBoxes[0].textContent = startupCount; // Startups Reviewed
+                if (statBoxes[1]) statBoxes[1].textContent = connCount; // Founder Connections
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        loadDashboardStats();
+        setInterval(loadDashboardStats, 30000);
+
+        async function handleLogout() { await window.CollabHubAPI.api.logout(); window.location.href = '/app/login'; }
     </script>
 </body>
 

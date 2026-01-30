@@ -28,7 +28,7 @@
     <div class="w-full max-w-lg">
         <!-- Logo -->
         <div class="text-center mb-8">
-            <a href="../index.html" class="inline-flex items-center space-x-2">
+            <a href="/" class="inline-flex items-center space-x-2">
                 <div
                     class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
                     <span class="text-white font-bold text-2xl">C</span>
@@ -142,7 +142,7 @@
             <!-- Login Link -->
             <p class="text-center text-gray-400 mt-8">
                 Already have an account?
-                <a href="login.html" class="text-primary-400 hover:text-primary-300 font-medium">Sign in</a>
+                <a href="/app/login" class="text-primary-400 hover:text-primary-300 font-medium">Sign in</a>
             </p>
         </div>
     </div>
@@ -218,7 +218,7 @@
                 successDiv.classList.remove('hidden');
 
                 setTimeout(() => {
-                    window.location.href = 'login.html';
+                    window.location.href = '/app/login';
                 }, 2000);
 
             } catch (error) {

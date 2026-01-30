@@ -19,7 +19,7 @@
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body
@@ -27,7 +27,7 @@
     <div class="w-full max-w-md">
         <!-- Logo -->
         <div class="text-center mb-8">
-            <a href="../index.html" class="inline-flex items-center space-x-2">
+                <a href="/index.html" class="inline-flex items-center space-x-2">
                 <div
                     class="w-12 h-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center">
                     <span class="text-white font-bold text-2xl">C</span>
@@ -132,58 +132,13 @@
             <!-- Register Link -->
             <p class="text-center text-gray-400 mt-8">
                 Don't have an account?
-                <a href="register.html" class="text-primary-400 hover:text-primary-300 font-medium">Sign up</a>
+                <a href="/app/register" class="text-primary-400 hover:text-primary-300 font-medium">Sign up</a>
             </p>
         </div>
     </div>
 
-    <script src="../js/api.js"></script>
-    <script>
-        // Toggle password visibility
-        document.getElementById('toggle-password').addEventListener('click', function () {
-            const input = document.querySelector('input[name="password"]');
-            input.type = input.type === 'password' ? 'text' : 'password';
-        });
-
-        // Handle form submission
-        document.getElementById('login-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const submitBtn = document.getElementById('submit-btn');
-            const spinner = document.getElementById('loading-spinner');
-            const errorDiv = document.getElementById('error-message');
-
-            const email = this.email.value;
-            const password = this.password.value;
-
-            // Show loading
-            submitBtn.disabled = true;
-            spinner.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-
-            try {
-                const { api } = window.CollabHubAPI;
-                await api.login(email, password);
-
-                // Redirect based on role
-                const user = window.CollabHubAPI.getUserData();
-                const dashboards = {
-                    founder: 'dashboard-founder.html',
-                    talent: 'dashboard-talent.html',
-                    investor: 'dashboard-investor.html',
-                    student: 'dashboard-talent.html'
-                };
-                window.location.href = dashboards[user.role] || 'dashboard-talent.html';
-
-            } catch (error) {
-                errorDiv.textContent = error.message || 'Invalid credentials. Please try again.';
-                errorDiv.classList.remove('hidden');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.classList.add('hidden');
-            }
-        });
-    </script>
+    <script src="/js/api.js"></script>
+    <script src="/js/login.js"></script>
 </body>
 
 </html>
