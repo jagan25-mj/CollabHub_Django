@@ -3,7 +3,7 @@
  * Handles all backend API calls with JWT authentication
  */
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'collabhub_access_token';
@@ -97,21 +97,28 @@ async function apiRequest(endpoint, options = {}) {
     let accessToken = getAccessToken();
 
     const makeRequest = async (token) => {
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
-        };
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
 
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                ...options,
+                headers
+            });
+
+            return response;
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Server unavailable. Please try again later.');
+            }
+            throw error;
         }
-
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            ...options,
-            headers
-        });
-
-        return response;
     };
 
     let response = await makeRequest(accessToken);
@@ -137,36 +144,50 @@ async function apiRequest(endpoint, options = {}) {
 const api = {
     // Auth
     async login(email, password) {
-        const response = await fetch(`${API_BASE_URL}/auth/login/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Login failed');
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ detail: 'Login failed' }));
+                throw new Error(error.detail || 'Login failed');
+            }
+
+            const data = await response.json();
+            setTokens(data.access, data.refresh);
+            setUserData(data.user);
+            return data;
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Server unavailable. Please try again later.');
+            }
+            throw error;
         }
-
-        const data = await response.json();
-        setTokens(data.access, data.refresh);
-        setUserData(data.user);
-        return data;
     },
 
     async register(userData) {
-        const response = await fetch(`${API_BASE_URL}/auth/register/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(JSON.stringify(error));
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ detail: 'Registration failed' }));
+                throw new Error(error.detail || 'Registration failed');
+            }
+
+            return response.json();
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Server unavailable. Please try again later.');
+            }
+            throw error;
         }
-
-        return response.json();
     },
 
     async logout() {

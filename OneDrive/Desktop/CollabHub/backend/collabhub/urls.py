@@ -43,16 +43,16 @@ def api_root(request):
         'version': '1.0.0',
         'endpoints': {
             'auth': {
-                'register': '/api/auth/register/',
-                'login': '/api/auth/login/',
-                'refresh': '/api/auth/refresh/',
-                'logout': '/api/auth/logout/',
+                'register': '/api/v1/auth/register/',
+                'login': '/api/v1/auth/login/',
+                'refresh': '/api/v1/auth/refresh/',
+                'logout': '/api/v1/auth/logout/',
             },
-            'users': '/api/users/',
-            'startups': '/api/startups/',
-            'opportunities': '/api/opportunities/',
-            'applications': '/api/collaborations/applications/',
-            'messages': '/api/messages/',
+            'users': '/api/v1/users/',
+            'startups': '/api/v1/startups/',
+            'opportunities': '/api/v1/opportunities/',
+            'applications': '/api/v1/collaborations/applications/',
+            'messages': '/api/v1/messages/',
         },
         'frontend': '/app/',
         'admin': '/admin/',
@@ -67,18 +67,18 @@ urlpatterns = [
     path('app/<path:page>', serve_frontend, name='frontend_page'),
     
     # API Root
-    path('api/', api_root, name='api_index'),
+    path('api/v1/', api_root, name='api_index'),
     
     # Django Admin
     path('admin/', admin.site.urls),
     
-    # API Endpoints (all prefixed with /api/)
-    path('api/auth/', include('users.urls.auth_urls')),           # Authentication
-    path('api/users/', include('users.urls.user_urls')),          # User management
-    path('api/startups/', include('startups.urls')),              # Startups
-    path('api/opportunities/', include('opportunities.urls')),    # Opportunities
-    path('api/collaborations/', include('collaborations.urls')),  # Collaborations
-    path('api/messages/', include('messaging.urls')),             # Messaging
+    # API Endpoints (all prefixed with /api/v1/)
+    path('api/v1/auth/', include('users.urls.auth_urls')),           # Authentication
+    path('api/v1/users/', include('users.urls.user_urls')),          # User management
+    path('api/v1/startups/', include('startups.urls')),              # Startups
+    path('api/v1/opportunities/', include('opportunities.urls')),    # Opportunities
+    path('api/v1/collaborations/', include('collaborations.urls')),  # Collaborations
+    path('api/v1/messages/', include('messaging.urls')),             # Messaging
 ]
 
 # Serve media and static files in development
